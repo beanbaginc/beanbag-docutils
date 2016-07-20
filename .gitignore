@@ -1,0 +1,9 @@
+# Wildcards
+*.pyc
+.*.swp
+
+# Directories/
+_build
+beanabg_docutils.egg-info/
+build
+dist
