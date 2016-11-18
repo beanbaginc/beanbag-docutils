@@ -67,6 +67,19 @@ class ExternalLink(object):
 
         return url
 
+    def __add__(self, s):
+        """Return the concatenated string for the base URL and another string.
+
+        Args:
+            s (unicode):
+                A string to concatenate onto this base URL.
+
+        Returns:
+            unicode:
+            The concatenated string.
+        """
+        return self.base_url + s
+
 
 def setup_link_roles(app):
     """Register roles for each external link that's been defined.
