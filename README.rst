@@ -82,6 +82,33 @@ To install this extension, add the following to your ``conf.py``::
    http://www.sphinx-doc.org/en/stable/ext/autodoc.html#event-autodoc-skip-member
 
 
+collect_files
+-------------
+
+Collects additional files in the build directory.
+
+This is used to copy files (indicated by glob patterns) from the source
+directory into the destination build directory. Each destination file will be
+in the same relative place in the tree.
+
+This is useful when you have non-ReST/image files that you want part of your
+built set of files, perhaps containing metadata or packaging that you want to
+ship along with the documentation.
+
+To use this, you just need to add the extension in :file:`conf.py`::
+
+    extensions = [
+        ...
+        'beanbag_docutils.sphinx.ext.collect_files',
+        ...
+    ]
+
+And then configure ``collect_file_patterns`` to be a list of
+filenames/glob patterns, like::
+
+    collect_file_patterns = ['metadata.json', '*.pdf']
+
+
 django_utils
 ------------
 
