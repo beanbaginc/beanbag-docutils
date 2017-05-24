@@ -184,6 +184,35 @@ To install this extension, add the following to your ``conf.py``::
     ]
 
 
+intersphinx_utils
+-----------------
+
+Enhances Intersphinx by fixing issues with ``option`` references and by
+adding a new directive for setting a priority order for Intersphinx
+documentation sets to use.
+
+To set the directives, use::
+
+    .. default-intersphinx:: myapp1.5, python
+
+    :ref:`some-reference`
+
+This would ensure that references using Intersphinx without an explicit prefix
+would first try ``myapp1.5`` and then ``python``. No other Intersphinx sets
+would be used.
+
+To install this extension, add the following to your ``conf.py``::
+
+    extensions = [
+        ...
+        'sphinx.ext.intersphinx',
+        'beanbag_docutils.sphinx.ext.intersphinx',
+        ...
+    ]
+
+Note that these extensions must be listed in this order.
+
+
 retina_images
 -------------
 
