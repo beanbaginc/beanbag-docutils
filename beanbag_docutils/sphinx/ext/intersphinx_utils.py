@@ -8,7 +8,7 @@ It also introduces a ``.. default-intersphinx::`` directive that allows for
 specifying one or more intersphinx set prefixes that should be tried if a
 reference could not be found. For example::
 
-    .. default-intersphinx:: myapp1.5, python
+    .. default-intersphinx:: myapp1.5 python
 
     :ref:`some-reference`
 
@@ -46,6 +46,7 @@ class DefaultIntersphinx(Directive):
     """Specifies one or more default intersphinx sets to use."""
 
     required_arguments = 1
+    optional_arguments = 100
 
     SPLIT_RE = re.compile(r',\s*')
 
@@ -58,7 +59,7 @@ class DefaultIntersphinx(Directive):
         """
         env = self.state.document.settings.env
         env.metadata[env.docname]['default-intersphinx-prefixes'] = \
-            self.SPLIT_RE.split(self.arguments[0].strip())
+            self.arguments
 
         return []
 
@@ -137,6 +138,7 @@ def _on_missing_reference(app, env, node, contnode):
             # Try all supported prefixes in order. These are the only allowed
             # to be inferred.
             for prefix in prefixes:
+                old_content = contnode[0]
                 node['reftarget'] = '%s:%s' % (prefix, target)
                 result = intersphinx.missing_reference(app, env, node,
                                                        contnode)
@@ -147,6 +149,7 @@ def _on_missing_reference(app, env, node, contnode):
                 # Couldn't find it. Go back to the original target and try
                 # again.
                 node['reftarget'] = orig_target
+                contnode[0] = old_content
 
             return None
 

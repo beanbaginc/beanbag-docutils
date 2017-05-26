@@ -219,7 +219,7 @@ documentation sets to use.
 
 To set the directives, use::
 
-    .. default-intersphinx:: myapp1.5, python
+    .. default-intersphinx:: myapp1.5 python
 
     :ref:`some-reference`
 
