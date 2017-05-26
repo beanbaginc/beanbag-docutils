@@ -30,7 +30,33 @@ with the generation of docs.
 autodoc_utils
 -------------
 
-Enhances autodoc support to allow for excluding content from docs.
+Enhances autodoc support for Beanbag's docstring format and to allow for
+excluding content from docs.
+
+
+Beanbag's Docstrings
+~~~~~~~~~~~~~~~~~~~~
+
+By setting ``napoleon_beanbag_docstring = True`` in :file:`conf.py`, and
+turning off ``napoleon_google_docstring``, Beanbag's docstring format can be
+used.
+
+This works just like the Google docstring format, but with a few additions:
+
+* A new ``Context:`` section to describe what happens within the context of a
+  context manager (including the variable).
+
+* New ``Model Attributes:`` and ``Option Args:`` sections for defining the
+  attributes on a model or the options in a dictionary when using JavaScript.
+
+* Parsing improvements to allow for wrapping argument types across lines,
+  which is useful when you have long module paths that won't fit on one line.
+
+This requires the ``sphinx.ext.napoleon`` module to be loaded.
+
+
+Excluding Content
+~~~~~~~~~~~~~~~~~
 
 A module can define top-level ``__autodoc_excludes__`` or ``__deprecated__``
 lists. These are in the same format as ``__all__``, in that they take a list
