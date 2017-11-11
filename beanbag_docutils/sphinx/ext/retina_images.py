@@ -15,6 +15,14 @@ To use this, you just need to add the extension in :file:`conf.py`::
         'beanbag_docutils.sphinx.ext.retina_images',
         ...
     ]
+
+
+Configuration
+=============
+
+``retina_suffixes``:
+    A list of suffix identifiers for Retina images. Each of these go after
+    the filename and before the extension. This defaults to ``['@2x', '@3x']``.
 """
 
 from __future__ import unicode_literals
@@ -35,20 +43,31 @@ def add_high_dpi_images(app, env):
         env (sphinx.environment.BuildEnvironment):
             The build environment for the generated docs.
     """
+    suffixes = app.config['retina_suffixes']
     retina_images = []
 
     for full_path, (docnames, filename) in env.images.iteritems():
         base, ext = os.path.splitext(full_path)
-        retina_path = base + '@2x' + ext
 
-        if os.path.exists(retina_path):
-            retina_images += [
-                (docname, retina_path)
-                for docname in docnames
-            ]
+        for suffix in suffixes:
+            src_retina_path = '%s%s%s' % (base, suffix, ext)
 
-    for docname, path in retina_images:
-        env.images.add_file(docname, path)
+            if os.path.exists(src_retina_path):
+                base, ext = os.path.splitext(filename)
+                dest_retina_name = '%s%s%s' % (base, suffix, ext)
+
+                retina_images += [
+                    (docname, src_retina_path, dest_retina_name)
+                    for docname in docnames
+                ]
+
+    for docname, src_path, dest_name in retina_images:
+        # Emulate add_file(), but give greater control over the filenames.
+        # Ideally we wouldn't dive into internals of _existing, but we should
+        # be able to adjust this easily enough for any changes that may be
+        # made.
+        env.images[src_path] = (set([docname]), dest_name)
+        env.images._existing.add(dest_name)
 
 
 def collect_pages(app):
@@ -67,14 +86,17 @@ def collect_pages(app):
         list:
         An empty list (indicating no additional HTML pages are collected).
     """
+    suffixes = app.config['retina_suffixes']
     new_images = {}
 
     for full_path, basename in app.builder.images.iteritems():
         base, ext = os.path.splitext(full_path)
-        retina_path = base + '@2x' + ext
 
-        if retina_path in app.env.images:
-            new_images[retina_path] = app.env.images[retina_path][1]
+        for suffix in suffixes:
+            retina_path = '%s%s%s' % (base, suffix, ext)
+
+            if retina_path in app.env.images:
+                new_images[retina_path] = app.env.images[retina_path][1]
 
     app.builder.images.update(new_images)
 
@@ -91,5 +113,7 @@ def setup(app):
         app (sphinx.application.Sphinx):
             The Sphinx application to listen to events on.
     """
+    app.add_config_value('retina_suffixes', ['@2x', '@3x'], True)
+
     app.connect(b'env-updated', add_high_dpi_images)
     app.connect(b'html-collect-pages', collect_pages)
