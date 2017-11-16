@@ -18,6 +18,15 @@ To use this, you just need to add the extension in :file:`conf.py`::
 Roles
 =====
 
+.. rst:directive:: http-status-codes-format
+
+   Specifies a new format to use by default for any :rst:role:`http` roles.
+   This should include ``%(code)s`` for the numeric code and ``%(name)s``
+   for the name of the HTTP status code.
+
+   Call this again without an argument to use the default format.
+
+
 .. rst:role:: http
 
    References an HTTP status code, expanding to the full status name and
@@ -27,6 +36,11 @@ Roles
 Configuration
 =============
 
+``http_status_codes_format``:
+    The format string used for the titles for HTTP status codes. This
+    defaults to ``HTTP %(code)s %(format)s`` and can be temporarily
+    overridden using :rst:directive:`http-status-codes-format`.
+
 ``http_status_codes_url``:
     The location of the docs for the status codes. This expects a string with a
     ``%s``, which will be replaced by the numeric HTTP status code.
@@ -35,10 +49,15 @@ Configuration
 from __future__ import unicode_literals
 
 from docutils import nodes
+from docutils.parsers.rst import Directive
+
+from sphinx.util.nodes import split_explicit_title
 
 
 DEFAULT_HTTP_STATUS_CODES_URL = \
     'http://en.wikipedia.org/wiki/List_of_HTTP_status_codes#%s'
+
+DEFAULT_HTTP_STATUS_CODES_FORMAT = 'HTTP %(code)s %(name)s'
 
 HTTP_STATUS_CODES = {
     100: 'Continue',
@@ -111,6 +130,30 @@ HTTP_STATUS_CODES = {
 }
 
 
+class SetStatusCodesFormatDirective(Directive):
+    """Specifies the format to use for the ``:http:`` role's text."""
+
+    required_arguments = 0
+    optional_arguments = 1
+    final_argument_whitespace = True
+
+    def run(self):
+        """Run the directive.
+
+        Returns:
+            list:
+            An empty list, always.
+        """
+        temp_data = self.state.document.settings.env.temp_data
+
+        if len(self.arguments):
+            temp_data['http-status-codes-format'] = self.arguments[0]
+        else:
+            temp_data.pop('http-status-codes-format', None)
+
+        return []
+
+
 def http_role(role, rawtext, text, linenum, inliner, options={}, content=[]):
     """Implementation of the :rst:role:`http` role.
 
@@ -144,21 +187,23 @@ def http_role(role, rawtext, text, linenum, inliner, options={}, content=[]):
         1) A single-item list with the resulting node.
         2) A single-item list with the error message (if any).
     """
+    has_explicit_title, title, target = split_explicit_title(text)
+
     try:
-        status_code = int(text)
+        status_code = int(target)
 
         if status_code not in HTTP_STATUS_CODES:
             raise ValueError
     except ValueError:
         msg = inliner.reporter.error(
             'HTTP status code must be a valid HTTP status; '
-            '"%s" is invalid.' % text,
+            '"%s" is invalid.' % target,
             line=linenum)
         prb = inliner.problematic(rawtext, rawtext, msg)
         return [prb], [msg]
 
-    http_status_codes_url = \
-        inliner.document.settings.env.config.http_status_codes_url
+    env = inliner.document.settings.env
+    http_status_codes_url = env.config.http_status_codes_url
 
     if not http_status_codes_url or '%s' not in http_status_codes_url:
         msg = inliner.reporter.error('http_status_codes_url must be '
@@ -168,8 +213,19 @@ def http_role(role, rawtext, text, linenum, inliner, options={}, content=[]):
         return [prb], [msg]
 
     ref = http_status_codes_url % status_code
-    status_code_text = 'HTTP %s %s' % (status_code,
-                                       HTTP_STATUS_CODES[status_code])
+
+    if has_explicit_title:
+        status_code_text = title
+    else:
+        http_status_codes_format = (
+            env.temp_data.get('http-status-codes-format') or
+            env.config.http_status_codes_format
+        )
+        status_code_text = http_status_codes_format % {
+            'code': status_code,
+            'name': HTTP_STATUS_CODES[status_code],
+        }
+
     node = nodes.reference(rawtext, status_code_text, refuri=ref, **options)
 
     return [node], []
@@ -178,14 +234,22 @@ def http_role(role, rawtext, text, linenum, inliner, options={}, content=[]):
 def setup(app):
     """Set up the Sphinx extension.
 
-    This registers the :rst:role:`http` role and ``http_status_codes_url``
-    configuration variable.
+    This registers the :rst:role:`http` role,
+    :rst:directive:`http-status-codes-format` directive, and the configuration
+    settings for specifying the format and URL for linking to HTTP status
+    codes.
 
     Args:
         app (sphinx.application.Sphinx):
             The Sphinx application to register roles and configuration on.
     """
+    app.add_config_value(b'http_status_codes_format',
+                         DEFAULT_HTTP_STATUS_CODES_FORMAT,
+                         True)
     app.add_config_value(b'http_status_codes_url',
                          DEFAULT_HTTP_STATUS_CODES_URL,
                          True)
+
+    app.add_directive('http-status-codes-format',
+                      SetStatusCodesFormatDirective)
     app.add_role(b'http', http_role)
