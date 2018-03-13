@@ -29,6 +29,8 @@ from __future__ import unicode_literals
 
 import os
 
+import six
+
 
 def add_high_dpi_images(app, env):
     """Add high-DPI images to the list of bundled images.
@@ -46,7 +48,7 @@ def add_high_dpi_images(app, env):
     suffixes = app.config['retina_suffixes']
     retina_images = []
 
-    for full_path, (docnames, filename) in env.images.iteritems():
+    for full_path, (docnames, filename) in six.iteritems(env.images):
         base, ext = os.path.splitext(full_path)
 
         for suffix in suffixes:
@@ -89,7 +91,7 @@ def collect_pages(app):
     suffixes = app.config['retina_suffixes']
     new_images = {}
 
-    for full_path, basename in app.builder.images.iteritems():
+    for full_path, basename in six.iteritems(app.builder.images):
         base, ext = os.path.splitext(full_path)
 
         for suffix in suffixes:
@@ -115,5 +117,5 @@ def setup(app):
     """
     app.add_config_value('retina_suffixes', ['@2x', '@3x'], True)
 
-    app.connect(b'env-updated', add_high_dpi_images)
-    app.connect(b'html-collect-pages', collect_pages)
+    app.connect('env-updated', add_high_dpi_images)
+    app.connect('html-collect-pages', collect_pages)

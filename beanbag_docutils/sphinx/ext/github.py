@@ -99,7 +99,7 @@ def _git_get_nearest_tracking_branch(merge_base, remote='origin'):
     best_ref_name = None
 
     for line in lines:
-        m = GIT_BRANCH_CONTAINS_RE.match(line.strip())
+        m = GIT_BRANCH_CONTAINS_RE.match(line.decode('utf-8').strip())
 
         if m:
             ref_name = m.group(1)

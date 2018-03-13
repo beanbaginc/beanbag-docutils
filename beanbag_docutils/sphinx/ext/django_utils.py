@@ -70,6 +70,6 @@ def setup(app):
     """
     Promise.__repr__ = _repr_promise
 
-    app.add_crossref_type(directivename=b'setting',
-                          rolename=b'setting',
-                          indextemplate=b'pair: %s; setting')
+    app.add_crossref_type(directivename=str('setting'),
+                          rolename=str('setting'),
+                          indextemplate=str('pair: %s; setting'))

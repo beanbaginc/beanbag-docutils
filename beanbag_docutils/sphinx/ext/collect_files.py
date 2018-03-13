@@ -84,8 +84,8 @@ def setup(app):
         dict:
         Information about the extension.
     """
-    app.add_config_value(b'collect_file_patterns', {}, True)
-    app.connect(b'env-updated', collect_files)
+    app.add_config_value('collect_file_patterns', {}, True)
+    app.connect('env-updated', collect_files)
 
     return {
         'version': '1.0',

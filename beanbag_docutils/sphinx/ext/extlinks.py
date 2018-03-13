@@ -107,8 +107,8 @@ def setup(app):
         Information about the extension. This is in the same format as what
         :py:func:`sphinx.ext.extlinks.setup` returns.
     """
-    app.add_config_value(b'extlinks', {}, b'env')
-    app.connect(b'builder-inited', setup_link_roles)
+    app.add_config_value('extlinks', {}, 'env')
+    app.connect('builder-inited', setup_link_roles)
 
     return {
         'version': '1.0',

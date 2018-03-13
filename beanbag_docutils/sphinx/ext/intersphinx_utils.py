@@ -37,9 +37,9 @@ from __future__ import unicode_literals
 import re
 
 import six
+from docutils.parsers.rst import Directive
 from sphinx.errors import ExtensionError
 from sphinx.ext import intersphinx
-from sphinx.util.compat import Directive
 
 
 class DefaultIntersphinx(Directive):

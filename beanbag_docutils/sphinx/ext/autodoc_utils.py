@@ -362,5 +362,5 @@ def setup(app):
     app.add_config_value('autodoc_excludes', {}, True)
     app.add_config_value('napoleon_beanbag_docstring', False, True)
 
-    app.connect(b'autodoc-skip-member', _filter_members)
-    app.connect(b'autodoc-process-docstring', _process_docstring)
+    app.connect('autodoc-skip-member', _filter_members)
+    app.connect('autodoc-process-docstring', _process_docstring)

@@ -20,6 +20,10 @@ setup(
     long_description=readme,
     url='https://github.com/beanbaginc/beanbag-docutils',
     packages=find_packages(),
+    install_requires=[
+        'six',
+        'Sphinx>=1.7.1',
+    ],
     maintainer='Christian Hammond',
     maintainer_email='christian@beanbaginc.com',
     classifiers=[
@@ -29,6 +33,12 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
         'Topic :: Documentation',
         'Topic :: Documentation :: Sphinx',
         'Topic :: Software Development',

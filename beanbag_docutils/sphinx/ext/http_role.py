@@ -243,13 +243,13 @@ def setup(app):
         app (sphinx.application.Sphinx):
             The Sphinx application to register roles and configuration on.
     """
-    app.add_config_value(b'http_status_codes_format',
+    app.add_config_value('http_status_codes_format',
                          DEFAULT_HTTP_STATUS_CODES_FORMAT,
                          True)
-    app.add_config_value(b'http_status_codes_url',
+    app.add_config_value('http_status_codes_url',
                          DEFAULT_HTTP_STATUS_CODES_URL,
                          True)
 
     app.add_directive('http-status-codes-format',
                       SetStatusCodesFormatDirective)
-    app.add_role(b'http', http_role)
+    app.add_role('http', http_role)
