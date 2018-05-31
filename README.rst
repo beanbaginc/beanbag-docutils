@@ -49,6 +49,9 @@ This works just like the Google docstring format, but with a few additions:
 * New ``Model Attributes:`` and ``Option Args:`` sections for defining the
   attributes on a model or the options in a dictionary when using JavaScript.
 
+* New ``Deprecated:``, ``Version Added:``, and ``Version Changed:`` sections
+  for defining version-related information.
+
 * Parsing improvements to allow for wrapping argument types across lines,
   which is useful when you have long module paths that won't fit on one line.
 

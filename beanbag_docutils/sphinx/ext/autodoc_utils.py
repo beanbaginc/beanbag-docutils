@@ -19,6 +19,9 @@ This works just like the Google docstring format, but with a few additions:
 * New ``Model Attributes:`` and ``Option Args:`` sections for defining the
   attributes on a model or the options in a dictionary when using JavaScript.
 
+* New ``Deprecated:``, ``Version Added:``, and ``Version Changed:`` sections
+  for defining version-related information.
+
 * Parsing improvements to allow for wrapping argument types across lines,
   which is useful when you have long module paths that won't fit on one line.
 
@@ -137,6 +140,12 @@ class BeanbagDocstring(GoogleDocstring):
         ('option args', 'Option Args'),
     ]
 
+    extra_version_info_sections = [
+        ('deprecated', 'deprecated'),
+        ('version added', 'versionadded'),
+        ('version changed', 'versionchanged'),
+    ]
+
     MAX_PARTIAL_TYPED_ARG_LINES = 3
 
     def __init__(self, *args, **kwargs):
@@ -156,6 +165,9 @@ class BeanbagDocstring(GoogleDocstring):
 
         for keyword, label in self.extra_fields_sections:
             self.register_fields_section(keyword, label)
+
+        for keyword, admonition in self.extra_version_info_sections:
+            self.register_version_info_section(keyword, admonition)
 
         self._parse(True)
 
@@ -184,6 +196,50 @@ class BeanbagDocstring(GoogleDocstring):
         """
         self._sections[keyword] = lambda *args: \
             self._format_fields(label, self._consume_fields())
+
+    def register_version_info_section(self, keyword, admonition):
+        """Register a version section with the given keyword and admonition.
+
+        Args:
+            keyword (unicode):
+                The keyword used in the docs.
+
+            admonition (unicode):
+                The admonition to use for the section.
+        """
+        self._sections[keyword] = lambda *args: \
+            self._format_admonition_with_params(
+                admonition,
+                self._consume_to_next_section())
+
+    def _format_admonition_with_params(self, admonition, lines):
+        """Format an admonition section with the first line as a parameter.
+
+        Args:
+            admonition (unicode):
+                The admonition name.
+
+            lines (list of unicode):
+                The list of lines to format.
+
+        Returns:
+            list of unicode:
+            The resulting list of lines.
+        """
+        lines = self._strip_empty(lines)
+
+        if lines:
+            param_line = lines[0].strip()
+
+            if param_line.endswith(':'):
+                param_line = param_line[:-1]
+
+            return (
+                ['.. %s:: %s' % (admonition, param_line), ''] +
+                self._indent(self._dedent(lines[1:], 3)) + ['']
+            )
+
+        return ['.. %s::' % admonition, '']
 
     def _parse(self, parse=False):
         """Parse the docstring.
