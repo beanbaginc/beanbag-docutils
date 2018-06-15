@@ -242,6 +242,21 @@ To install this extension, add the following to your ``conf.py``::
 Note that these extensions must be listed in this order.
 
 
+ref_utils
+---------
+
+This enhances references, allowing both Python and JavaScript references to
+break paths (like ``foo.bar.MyClass``) across multiple lines.
+
+To install this extension, add the following to your ``conf.py``::
+
+    extensions = [
+        ...
+        'beanbag_docutils.sphinx.ext.ref_utils',
+        ...
+    ]
+
+
 retina_images
 -------------
 
