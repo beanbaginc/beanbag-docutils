@@ -109,6 +109,7 @@ from __future__ import unicode_literals
 import re
 import sys
 
+import six
 from sphinx.ext.napoleon.docstring import GoogleDocstring
 
 
@@ -288,6 +289,11 @@ class BeanbagDocstring(GoogleDocstring):
                     # See if there's an ending part anywhere.
                     lines = self._line_iter.peek(i + 1)
 
+                    if not isinstance(lines[i], six.string_types):
+                        # We're past the strings and into something else.
+                        # Bail.
+                        break
+
                     m = self.partial_typed_arg_start_re.match(lines[i])
 
                     if m:
@@ -297,10 +303,29 @@ class BeanbagDocstring(GoogleDocstring):
                     m = self.partial_typed_arg_end_re.match(lines[i])
 
                     if m:
-                        result = '%s%s' % (
-                            lines[0],
-                            ''.join(line.strip() for line in lines[1:])
-                        )
+                        # We need to rebuild the string based on the lines
+                        # we've determined for the field. We have to be
+                        # careful to join them in such a way where we have
+                        # a space in-between if separating words, but not if
+                        # separating parts of a class name.
+                        parts = []
+                        prev_line = None
+
+                        for line in lines:
+                            norm_line = line.strip()
+
+                            if norm_line and prev_line is not None:
+                                if (norm_line.startswith('.') or
+                                    prev_line.endswith('.')):
+                                    line = norm_line
+                                else:
+                                    parts.append(' ')
+
+                            parts.append(line)
+                            prev_line = norm_line
+
+                        result = ''.join(parts)
+
                         break
 
                 if result:
