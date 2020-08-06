@@ -37,7 +37,7 @@ excluding content from docs.
 Beanbag's Docstrings
 ~~~~~~~~~~~~~~~~~~~~
 
-By setting ``napoleon_beanbag_docstring = True`` in :file:`conf.py`, and
+By setting ``napoleon_beanbag_docstring = True`` in ``conf.py``, and
 turning off ``napoleon_google_docstring``, Beanbag's docstring format can be
 used.
 
@@ -124,7 +124,7 @@ This is useful when you have non-ReST/image files that you want part of your
 built set of files, perhaps containing metadata or packaging that you want to
 ship along with the documentation.
 
-To use this, you just need to add the extension in :file:`conf.py`::
+To use this, you just need to add the extension in ``conf.py``::
 
     extensions = [
         ...

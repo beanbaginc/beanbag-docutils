@@ -22,7 +22,7 @@ setup(
     packages=find_packages(),
     install_requires=[
         'six',
-        'Sphinx>=1.7.1,<=1.999',
+        'Sphinx>=1.7.1',
     ],
     maintainer='Christian Hammond',
     maintainer_email='christian@beanbaginc.com',
