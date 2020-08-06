@@ -375,7 +375,11 @@ def _filter_members(app, what, name, obj, skip, options):
         bool:
         Whether the member will be skipped.
     """
-    module_name = app.env.temp_data['autodoc:module']
+    module_name = app.env.temp_data.get('autodoc:module')
+
+    if not module_name:
+        return
+
     module = sys.modules[module_name]
 
     # Check if the module itself is excluding this from the docs.
