@@ -22,7 +22,8 @@ setup(
     packages=find_packages(),
     install_requires=[
         'six',
-        'Sphinx>=1.7.1',
+        'Sphinx>=1.8.5,<1.8.999; python_version <= "2.7"',
+        'Sphinx>=3.2.1; python_version >= "3.6"',
     ],
     maintainer='Christian Hammond',
     maintainer_email='christian@beanbaginc.com',
