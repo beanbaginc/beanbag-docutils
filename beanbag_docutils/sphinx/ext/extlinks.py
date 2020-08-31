@@ -1,7 +1,7 @@
 """Sphinx extension to define external links that support anchors.
 
 Sphinx comes bundled with a :py:mod:`sphinx.ext.extlinks` extension, which
-allows a :file:`conf.py` to define roles for external linkes. These don't
+allows a :file:`conf.py` to define roles for external links. These don't
 support anchors, however, making it impossible to link to properly link in some
 cases.
 

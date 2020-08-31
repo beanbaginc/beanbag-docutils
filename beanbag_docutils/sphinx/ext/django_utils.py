@@ -4,7 +4,7 @@ This adds some improvements when working with Django-based classes in autodocs,
 and when referencing Django documentation.
 
 Localized strings using ``ugettext_lazy`` will be turned into actual strings
-for the documentation, which is usedul for forms and models.
+for the documentation, which is useful for forms and models.
 
 Roles are also added for common cross-references.
 
@@ -61,7 +61,7 @@ def _repr_promise(promise):
 def setup(app):
     """Set up the Sphinx extension.
 
-    This registers cross-references and fixes up the lazily-localizeed strings
+    This registers cross-references and fixes up the lazily-localized strings
     for display.
 
     Args:

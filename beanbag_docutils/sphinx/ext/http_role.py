@@ -55,7 +55,7 @@ from sphinx.util.nodes import split_explicit_title
 
 
 DEFAULT_HTTP_STATUS_CODES_URL = \
-    'http://en.wikipedia.org/wiki/List_of_HTTP_status_codes#%s'
+    'https://wikipedia.org/wiki/List_of_HTTP_status_codes#%s'
 
 DEFAULT_HTTP_STATUS_CODES_FORMAT = 'HTTP %(code)s %(name)s'
 

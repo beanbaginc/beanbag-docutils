@@ -149,6 +149,8 @@ class BeanbagDocstring(GoogleDocstring):
 
     MAX_PARTIAL_TYPED_ARG_LINES = 3
 
+    COMMA_RE = re.compile(r',\s*')
+
     def __init__(self, *args, **kwargs):
         """Initialize the parser.
 
@@ -325,6 +327,9 @@ class BeanbagDocstring(GoogleDocstring):
                             prev_line = norm_line
 
                         result = ''.join(parts)
+
+                        if ',' in result:
+                            result = ', '.join(self.COMMA_RE.split(result))
 
                         break
 
