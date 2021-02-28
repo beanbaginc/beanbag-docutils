@@ -1,0 +1,182 @@
+====================
+beanbag-docutils 1.0
+====================
+
+**Release date:** July 19, 2016
+
+
+Initial release, featuring:
+
+
+autodoc_utils
+=============
+
+Enhances autodoc support to allow for excluding content from docs.
+
+A module can define top-level ``__autodoc_excludes__`` or ``__deprecated__``
+lists. These are in the same format as ``__all__``, in that they take a list
+of strings for top-level classes, functions, and variables. Anything listed
+here will be excluded from any autodoc code.
+
+``__autodoc_excludes__`` is particularly handy when documenting an
+:file:`__init__.py` that imports contents from a submodule and re-exports it
+in ``__all__``. In this case, autodoc would normally output documentation both
+in :file:`__init__.py` and the submodule, but that can be avoided by setting:
+
+.. code-block:: python
+
+    __autodoc_excludes = __all__
+
+Excludes can also be defined globally, filtered by the type of object the
+docstring would belong to. See the documentation for autodoc-skip-member_ for
+more information. You can configure this in :file:`conf.py` by doing:
+
+.. code-block:: python
+
+    autodoc_excludes = {
+        # Applies to modules, classes, and anything else.
+        '*': [
+            '__dict__',
+            '__doc__',
+            '__module__',
+            '__weakref__',
+        ],
+        'class': [
+            # Useful for Django models.
+            'DoesNotExist',
+            'MultipleObjectsReturned',
+            'objects',
+
+            # Useful forms.
+            'base_fields',
+            'media',
+        ],
+    }
+
+That's just an example, but a useful one for Django users.
+
+To install this extension, add the following to your :file:`conf.py`:
+
+.. code-block:: python
+
+    extensions = [
+        ...
+        'beanbag_docutils.sphinx.ext.autodoc_utils',
+        ...
+    ]
+
+.. _autodoc-skip-member:
+   http://www.sphinx-doc.org/en/stable/ext/autodoc.html#event-autodoc-skip-member
+
+
+django_utils
+============
+
+Adds some improvements when working with Django-based classes in autodocs, and
+when referencing Django documentation.
+
+First, this will take localized strings using
+:py:func:`~django.utils.translation.ugettext_lazy` and turn them into actual
+strings, which is useful for forms and models.
+
+Second, this adds linking for setting-based documentation, allowing custom
+settings (from :py:mod:`django.conf.settings`) to be documented and
+referenced, like so:
+
+.. code-block:: rst
+
+    .. setting:: MY_SETTING
+
+    Settings go here.
+
+    And then to reference it: :setting:`MY_SETTING`.
+
+
+To install this extension, add the following to your ``conf.py``:
+
+.. code-block:: python
+
+    extensions = [
+        ...
+        'beanbag_docutils.sphinx.ext.django_utils',
+        ...
+    ]
+
+
+github_linkcode
+===============
+
+Links source code for modules, classes, etc. to the correct line on GitHub.
+This prevents having to bundle the source code along with the documentation,
+and better ties everything together.
+
+To use this, simply add the following to :file:`conf.py`:
+
+.. code-block:: python
+
+    from beanbag_docutils.sphinx.ext.github import github_linkcode_resolve
+
+    extensions = [
+        ...
+        'sphinx.ext.linkcode',
+        ...
+    ]
+
+    linkcode_resolve = github_linkcode_resolve
+
+
+http_role
+=========
+
+Provides references for HTTP codes, linking to the matching docs on Wikipedia.
+
+To create a link, simply do:
+
+.. code-block:: rst
+
+    This is :http:`404`.
+
+If you want to use a different URL, you can add the following to
+:file:`conf.py`:
+
+.. code-block:: python
+
+    http_status_codes_url = 'http://mydomain/http/%s'
+
+Where ``%s`` will be replaced by the HTTP code.
+
+To install this extension, add the following to your :file:`conf.py`:
+
+.. code-block:: python
+
+    extensions = [
+        ...
+        'beanbag_docutils.sphinx.ext.http_role',
+        ...
+    ]
+
+
+retina_images
+=============
+
+Copies all Retina versions of images (any with a ``@2x`` filename) into the
+build directory for the docs. This works well with scripts like retina.js_.
+
+To install this extension, add the following to your :file:`conf.py`:
+
+.. code-block:: python
+
+    extensions = [
+        ...
+        'beanbag_docutils.sphinx.ext.retina_images',
+        ...
+    ]
+
+
+.. _retina.js: https://imulus.github.io/retinajs/
+
+
+Contributors
+============
+
+* Christian Hammond

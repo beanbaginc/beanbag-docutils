@@ -1,0 +1,69 @@
+====================
+beanbag-docutils 1.7
+====================
+
+**Release date:** June 14, 2018
+
+
+New Features
+============
+
+* Added compatibility with Python 3.
+
+  This package now supports Python 2.7 and 3.4 through 3.6.
+
+* Added new documentation sections for the `Beanbag documentation format`_.
+
+  This is enabled when using
+  :py:mod:`beanbag_docutils.sphinx.ext.autodoc_utils` with
+  ``napoleon_beanbag_docstring = True``.
+
+  This adds:
+
+  ``Deprecated``:
+      A version in which something is deprecated, and an optional description.
+      This is similar to the ReST :rst:dir:`deprecated` directive.
+
+  ``Version Added``:
+      A version in which something is added, and an optional description.
+      This is similar to the ReST :rst:dir:`versionadded` directive.
+
+  ``Version Changed``:
+      A version in which something is changed, and an optional description.
+      This is similar to the ReST :rst:dir:`versionchanged` directive.
+
+* Added a Sphinx extension (:py:mod:`beanbag_docutils.sphinx.ext.ref_utils`)
+  for improving code references.
+
+  This currently enhances references, allowing both Python and JavaScript
+  references to break paths (like ``foo.bar.MyClass``) across multiple lines.
+
+  To install this extension, add the following to your :file:`conf.py`:
+
+  .. code-block:: python
+
+      extensions = [
+          ...
+          'beanbag_docutils.sphinx.ext.ref_utils',
+          ...
+      ]
+
+
+.. _Beanbag documentation format:
+   https://www.notion.so/reviewboard/Standard-Documentation-Format-4388f594d86547cc949b365cda3cf391
+
+
+Bug Fixes
+=========
+
+* Fixed handling of multi-line argument types when using the
+  `Beanbag documentation format`_ support.
+
+  This addresses a case where spaces after a type (such as ``int, optional``)
+  would be lost.
+
+
+Contributors
+============
+
+* Christian Hammond

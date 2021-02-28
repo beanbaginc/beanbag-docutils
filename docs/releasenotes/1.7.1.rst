@@ -1,0 +1,27 @@
+======================
+beanbag-docutils 1.7.1
+======================
+
+**Release date:** August 5, 2020
+
+
+Compatibility Changes
+=====================
+
+* Capped the Sphinx_ version to >=1.7.1, <2.0.
+
+
+.. _Sphinx: https://pypi.org/project/Sphinx
+
+
+Bug Fixes
+=========
+
+* Fixed a crash in :py:mod:`beanbag_docutils.sphinx.ext.autodoc_utils` on
+  newer versions of Sphinx.
+
+
+Contributors
+============
+
+* Christian Hammond

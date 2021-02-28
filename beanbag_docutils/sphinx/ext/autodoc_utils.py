@@ -70,6 +70,10 @@ more information. You can configure this in :file:`conf.py` by doing::
 That's just an example, but a useful one for Django users.
 
 
+.. _autodoc-skip-member:
+   http://www.sphinx-doc.org/en/stable/ext/autodoc.html#event-autodoc-skip-member
+
+
 Setup
 =====
 
@@ -81,7 +85,7 @@ To use this, add the extension in :file:`conf.py`::
         ...
     ]
 
-If you want to use the Beanbag docstring format, you'll need:
+If you want to use the Beanbag docstring format, you'll need::
 
     extensions = [
         ...
@@ -97,10 +101,10 @@ If you want to use the Beanbag docstring format, you'll need:
 Configuration
 =============
 
-``autodoc_excludes``:
+``autodoc_excludes``
     Optional global exclusions to apply, as shown above.
 
-``napoleon_beanbag_docstring``::
+``napoleon_beanbag_docstring``
     Enable parsing of the Beanbag docstring format.
 """
 

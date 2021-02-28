@@ -1,0 +1,35 @@
+====================
+beanbag-docutils 1.1
+====================
+
+**Release date:** November 18, 2016
+
+
+New Features
+============
+
+* Added :py:mod:`beanbag_docutils.sphinx.ext.extlinks` for defining
+  anchor-aware external links.
+
+  Sphinx ships with a :py:mod:`sphinx.ext.extlinks` extension, which allows
+  for defining roles that map to external links. These take a URL that work as
+  a format string, containing a ``%s``. The reference is then passed into
+  that, and the result is a URL embedded in the page.
+
+  This is very useful, but has a flaw in that anchors do not work with
+  these links. If the format string has any content after the ``%s``, then
+  that content will appear after the anchor. Support for this is being
+  tracked upstream by Sphinx, but as of yet there isn't any indication of
+  a plan to implement anchor support.
+
+  This extension adds that anchor support, building upon the logic in
+  Sphinx's extension and adding a shim that handles anchor-safe string
+  formatting. It's a drop-in replacement that can be used without changing
+  any configuration, meaning we can remove it down the road without any
+  real work if Sphinx ends up fixing this upstream.
+
+
+Contributors
+============
+
+* Christian Hammond

@@ -3,8 +3,9 @@
 This adds some improvements when working with Django-based classes in autodocs,
 and when referencing Django documentation.
 
-Localized strings using ``ugettext_lazy`` will be turned into actual strings
-for the documentation, which is useful for forms and models.
+Localized strings using :py:func:`~django.utils.translation.ugettext_lazy` will
+be turned into actual strings for the documentation, which is useful for forms
+and models.
 
 Roles are also added for common cross-references.
 

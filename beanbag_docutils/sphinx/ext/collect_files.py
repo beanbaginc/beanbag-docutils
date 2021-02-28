@@ -27,7 +27,7 @@ filenames/glob patterns.
 Configuration
 =============
 
-``collect_file_patterns``:
+``collect_file_patterns``
     List of filenames or glob patterns to include from the source directory
     into the build directory.
 """

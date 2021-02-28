@@ -1,0 +1,40 @@
+====================
+beanbag-docutils 1.4
+====================
+
+**Release date:** May 25, 2017
+
+
+New Features
+============
+
+* Added a parser for the `Beanbag documentation format`_.
+
+  This is part of :py:mod:`beanbag_docutils.sphinx.ext.autodoc_utils`, and is
+  enabled when setting ``napoleon_beanbag_docstring = True`` in
+  :file:`conf.py`. It replaces the Google and Numpy docstring formats, but
+  requires :py:mod:`sphinx.ext.napoleon`.
+
+  This currently supports:
+
+  ``Context``:
+      Describes what happens within the context of a context manager.
+
+  ``Model Attributes``:
+      Describes the attributes on a Backbone.js model.
+
+  ``Option Args``:
+      Describes options available to a function in JavaScript.
+
+  This parser also allows types (used in ``Args`` and other sections) to
+  be wrapped across lines.
+
+
+.. _Beanbag documentation format:
+   https://www.notion.so/reviewboard/Standard-Documentation-Format-4388f594d86547cc949b365cda3cf391
+
+
+Contributors
+============
+
+* Christian Hammond

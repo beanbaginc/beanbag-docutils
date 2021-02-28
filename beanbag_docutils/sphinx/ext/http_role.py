@@ -36,12 +36,12 @@ Roles
 Configuration
 =============
 
-``http_status_codes_format``:
+``http_status_codes_format``
     The format string used for the titles for HTTP status codes. This
     defaults to ``HTTP %(code)s %(format)s`` and can be temporarily
-    overridden using :rst:directive:`http-status-codes-format`.
+    overridden using :rst:dir:`http-status-codes-format`.
 
-``http_status_codes_url``:
+``http_status_codes_url``
     The location of the docs for the status codes. This expects a string with a
     ``%s``, which will be replaced by the numeric HTTP status code.
 """

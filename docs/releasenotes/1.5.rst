@@ -1,0 +1,25 @@
+====================
+beanbag-docutils 1.5
+====================
+
+**Release date:** November 10, 2017
+
+
+New Features
+============
+
+* Added configuration options for available Retina suffixes like ``@2x`` and
+  ``@3x`` in :py:mod:`beanbag_docutils.sphinx.ext.retina_images`.
+
+
+Bug Fixes
+=========
+
+* Fixed handling multiple images with the same filenames in
+  :py:mod:`beanbag_docutils.sphinx.ext.retina_images`.
+
+
+Contributors
+============
+
+* Christian Hammond

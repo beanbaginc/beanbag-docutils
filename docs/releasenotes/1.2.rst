@@ -1,0 +1,43 @@
+====================
+beanbag-docutils 1.2
+====================
+
+**Release date:** January 21, 2017
+
+
+New Features
+============
+
+* Added :py:mod:`beanbag_docutils.sphinx.ext.collect_files` for collecting
+  additional files in a build.
+
+  This is used to copy files (indicated by glob patterns) from the source
+  directory into the destination build directory. Each destination file will be
+  in the same relative place in the tree.
+
+  This is useful when you have non-ReST/image files that you want part of your
+  built set of files, perhaps containing metadata or packaging that you want to
+  ship along with the documentation.
+
+  To use this, you just need to add the extension in :file:`conf.py`:
+
+  .. code-block:: python
+
+      extensions = [
+          ...
+          'beanbag_docutils.sphinx.ext.collect_files',
+          ...
+      ]
+
+  And then configure ``collect_file_patterns`` to be a list of
+  filenames/glob patterns, like:
+
+  .. code-block:: python
+
+      collect_file_patterns = ['metadata.json', '*.pdf']
+
+
+Contributors
+============
+
+* Christian Hammond

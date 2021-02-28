@@ -1,0 +1,17 @@
+====================
+beanbag-docutils 1.6
+====================
+
+**Release date:** November 16, 2017
+
+
+New Features
+============
+
+* Added custom titles for HTTP error codes in :rst:role:`http`.
+
+
+Contributors
+============
+
+* Christian Hammond
