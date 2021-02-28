@@ -1,0 +1,37 @@
+====================
+beanbag-docutils 1.8
+====================
+
+**Release date:** TBD
+
+
+Compatibility Improvements
+==========================
+
+* Added compatibility for Django 3.x.
+
+* Added compatibility with Sphinx 3.x+.
+
+  The correct version is now used depending on the version of Python.
+
+
+Project Changes
+===============
+
+* Universal wheels are now built for Python 2 and 3 compatibility.
+
+* Added documentation for beanbag-docutils.
+
+* Added a unit test suite.
+
+
+Bug Fixes
+=========
+
+* Fixed a syntax error with :rst:role:`http` with HTTP 418 on Python 3.
+
+
+Contributors
+============
+
+* Christian Hammond
