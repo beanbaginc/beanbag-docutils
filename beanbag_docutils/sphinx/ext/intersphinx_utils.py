@@ -170,13 +170,28 @@ def setup(app):
 
     # Disconnect the other intersphinx listener. We're going to override it.
     listeners = app.events.listeners.get('missing-reference', {})
+    intersphinx_listener_id = None
 
-    for listener_id, callback in six.iteritems(listeners):
-        if callback == intersphinx.missing_reference:
-            del listeners[listener_id]
-            break
+    if isinstance(listeners, list):
+        # Sphinx >= 3.x
+        for listener in listeners:
+            if listener.handler == intersphinx.missing_reference:
+                intersphinx_listener_id = listener.id
+                break
     else:
-        raise ExtensionError('beanbag_docutils.sphinx.ext.intersphinx_utils '
-                             'must come after sphinx.ext.intersphinx')
+        assert isinstance(listeners, dict)
+
+        # Sphinx < 3.x
+        for listener_id, callback in six.iteritems(listeners):
+            if callback == intersphinx.missing_reference:
+                intersphinx_listener_id = listener_id
+                break
+
+    if intersphinx_listener_id is not None:
+        app.events.disconnect(intersphinx_listener_id)
+    else:
+        raise ExtensionError(
+            'beanbag_docutils.sphinx.ext.intersphinx_utils '
+            'must come after sphinx.ext.intersphinx')
 
     app.connect('missing-reference', _on_missing_reference)
