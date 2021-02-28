@@ -43,7 +43,7 @@ Roles
 
 from __future__ import unicode_literals
 
-from django.utils import six
+import six
 from django.utils.functional import Promise
 
 
