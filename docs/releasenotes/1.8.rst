@@ -2,7 +2,7 @@
 beanbag-docutils 1.8
 ====================
 
-**Release date:** TBD
+**Release date:** February 27, 2021
 
 
 Compatibility Improvements
