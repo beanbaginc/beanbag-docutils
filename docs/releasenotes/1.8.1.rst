@@ -1,0 +1,25 @@
+======================
+beanbag-docutils 1.8.1
+======================
+
+**Release date:** August 1, 2021
+
+
+Compatibility Improvements
+==========================
+
+* Added compatibility with Sphinx 4.x+.
+
+
+Bug Fixes
+=========
+
+* Fixed the :py:mod:`beanbag_docutils.sphinx.ext.extlinks` module on
+  Sphinx 4+.
+
+
+Contributors
+============
+
+* Christian Hammond
+
