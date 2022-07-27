@@ -114,6 +114,7 @@ import re
 import sys
 
 import six
+from sphinx import version_info
 from sphinx.ext.napoleon.docstring import GoogleDocstring
 
 
@@ -154,6 +155,8 @@ class BeanbagDocstring(GoogleDocstring):
     MAX_PARTIAL_TYPED_ARG_LINES = 3
 
     COMMA_RE = re.compile(r',\s*')
+
+    _USES_LINES_DEQUE = (version_info[:2] >= (5, 1))
 
     def __init__(self, *args, **kwargs):
         """Initialize the parser.
@@ -285,7 +288,7 @@ class BeanbagDocstring(GoogleDocstring):
             method.
         """
         if parse_type:
-            lines = self._line_iter.peek(1)
+            lines = self.peek_lines()
             m = self.partial_typed_arg_start_re.match(lines[0])
 
             if m:
@@ -293,7 +296,7 @@ class BeanbagDocstring(GoogleDocstring):
 
                 for i in range(1, self.MAX_PARTIAL_TYPED_ARG_LINES):
                     # See if there's an ending part anywhere.
-                    lines = self._line_iter.peek(i + 1)
+                    lines = self.peek_lines(i + 1)
 
                     if not isinstance(lines[i], six.string_types):
                         # We're past the strings and into something else.
@@ -339,14 +342,79 @@ class BeanbagDocstring(GoogleDocstring):
 
                 if result:
                     # Consume those lines so they're not processed again.
-                    self._line_iter.next(len(lines))
+                    self.consume_lines(len(lines))
 
                     # Insert the new resulting line in the line cache for
                     # processing.
-                    self._line_iter._cache.appendleft(result)
+                    self.queue_line(result)
 
         return super(BeanbagDocstring, self)._consume_field(parse_type,
                                                             *args, **kwargs)
+
+    def peek_lines(self, num_lines=1):
+        """Return the specified number of lines without consuming them.
+
+        Version Added:
+            1.9
+
+        Args:
+            num_lines (int, optional):
+                The number of lines to return.
+
+        Returns:
+            list of str:
+            The resulting lines.
+        """
+        if self._USES_LINES_DEQUE:
+            # Sphinx >= 5.1
+            lines = self._lines
+
+            return [
+                lines.get(i)
+                for i in range(num_lines)
+            ]
+        else:
+            # Sphinx < 5.1
+            return self._line_iter.peek(num_lines)
+
+    def consume_lines(self, num_lines):
+        """Consume the specified number of lines.
+
+        This will ensure that these lines are not processed any further.
+
+        Version Added:
+            1.9
+
+        Args:
+            num_lines (int, optional):
+                The number of lines to consume.
+        """
+        if self._USES_LINES_DEQUE:
+            # Sphinx >= 5.1
+            for i in range(num_lines):
+                self._lines.popleft()
+        else:
+            # Sphinx < 5.1
+            self._line_iter.next(num_lines)
+
+    def queue_line(self, line):
+        """Queue a line for processing.
+
+        This will place the line at the beginning of the processing queue.
+
+        Version Added:
+            1.9
+
+        Args:
+            line (str):
+                The line to queue.
+        """
+        if self._USES_LINES_DEQUE:
+            # Sphinx >= 5.1
+            self._lines.appendleft(line)
+        else:
+            # Sphinx < 5.1
+            self._line_iter._cache.appendleft(line)
 
 
 def _filter_members(app, what, name, obj, skip, options):
