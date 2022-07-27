@@ -1,0 +1,20 @@
+====================
+beanbag-docutils 1.9
+====================
+
+**Release date:** July 26, 2022
+
+
+Compatibility Improvements
+==========================
+
+* Added compatibility with Sphinx 5.x.
+
+* Updated the Sphinx dependency to not specify a range. It's now completely
+  in the hands of the consuming codebase.
+
+
+Contributors
+============
+
+* Christian Hammond

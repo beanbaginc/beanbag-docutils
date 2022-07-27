@@ -22,8 +22,7 @@ setup(
     packages=find_packages(),
     install_requires=[
         'six',
-        'Sphinx>=1.8.5,<1.8.999; python_version <= "2.7"',
-        'Sphinx>=3.2.1; python_version >= "3.6"',
+        'Sphinx',
     ],
     maintainer='Christian Hammond',
     maintainer_email='christian@beanbaginc.com',
@@ -41,6 +40,7 @@ setup(
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
         'Topic :: Documentation',
         'Topic :: Documentation :: Sphinx',
         'Topic :: Software Development',
