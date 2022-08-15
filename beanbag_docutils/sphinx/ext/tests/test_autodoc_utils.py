@@ -154,13 +154,13 @@ class BeanbagDocstringTests(SphinxExtTestCase):
             ),
             (
                 ':param arg1: Description of arg1.\n'
-                ':type arg1: str\n'
+                ':type arg1: :class:`str`\n'
                 ':param arg2: Description of arg2.\n'
-                ':type arg2: foo.bar.abc.def.ghi, optional\n'
+                ':type arg2: :class:`foo.bar.abc.def.ghi`, *optional*\n'
                 ':param \\*args: Description of args.\n'
-                ':type \\*args: tuple\n'
+                ':type \\*args: :class:`tuple`\n'
                 ':param \\*\\*kwargs: Description of kwargs.\n'
-                ':type \\*\\*kwargs: dict\n'
+                ':type \\*\\*kwargs: :class:`dict`\n'
             )
         )
 
@@ -249,6 +249,27 @@ class BeanbagDocstringTests(SphinxExtTestCase):
             )
         )
 
+    def test_keys(self):
+        """Testing Beanbag docstring with Keys section"""
+        self.assertEqual(
+            self._render_docstring(
+                'Keys:\n'
+                '    key1 (str):\n'
+                '        Description 1\n'
+                '\n'
+                '    key2 (dict):\n'
+                '        Description 2\n'
+                '\n'
+                '    key3 (int, optional):\n'
+                '        Description 3\n'
+            ),
+            (
+                ':Keys: * **key1** (:class:`str`) -- Description 1\n'
+                '       * **key2** (:class:`dict`) -- Description 2\n'
+                '       * **key3** (:class:`int`, *optional*)'
+                ' -- Description 3\n'
+            ))
+
     def test_model_attributes(self):
         """Testing Beanbag docstring with Model Attributes section"""
         self.assertEqual(
@@ -262,9 +283,9 @@ class BeanbagDocstringTests(SphinxExtTestCase):
                 '        Description of attr2\n'
             ),
             (
-                ':Model Attributes: * **attr1** (*dict*)'
+                ':Model Attributes: * **attr1** (:class:`dict`)'
                 ' -- Description of attr1\n'
-                '                   * **attr2** (*foo.bar.baz*)'
+                '                   * **attr2** (:class:`foo.bar.baz`)'
                 ' -- Description of attr2\n'
             )
         )
@@ -283,12 +304,32 @@ class BeanbagDocstringTests(SphinxExtTestCase):
                 '        Description of attr2\n'
             ),
             (
-                ':Option Args: * **attr1** (*dict*)'
+                ':Option Args: * **attr1** (:class:`dict`)'
                 ' -- Description of attr1\n'
-                '              * **attr2** (*foo.bar.baz, optional*)'
+                '              * **attr2** (:class:`foo.bar.baz`, *optional*)'
                 ' -- Description of attr2\n'
             )
         )
+
+    def test_tuple(self):
+        """Testing Beanbag docstring with Tuple section"""
+        self.assertEqual(
+            self._render_docstring(
+                'Tuple:\n'
+                '    0 (str):\n'
+                '        Description 1\n'
+                '\n'
+                '    1 (dict):\n'
+                '        Description 2\n'
+                '\n'
+                '    2 (int, optional):\n'
+                '        Description 3\n'
+            ),
+            (
+                ':Tuple: * **0** (:class:`str`) -- Description 1\n'
+                '        * **1** (:class:`dict`) -- Description 2\n'
+                '        * **2** (:class:`int`, *optional*) -- Description 3\n'
+            ))
 
     def test_version_added_section_with_version(self):
         """Testing Beanbag docstring with Version Added section with version"""

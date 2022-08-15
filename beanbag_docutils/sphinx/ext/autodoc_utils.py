@@ -115,7 +115,7 @@ import sys
 
 import six
 from sphinx import version_info
-from sphinx.ext.napoleon.docstring import GoogleDocstring
+from sphinx.ext.napoleon.docstring import GoogleDocstring, _convert_type_spec
 
 
 class BeanbagDocstring(GoogleDocstring):
@@ -142,8 +142,10 @@ class BeanbagDocstring(GoogleDocstring):
     ]
 
     extra_fields_sections = [
+        ('keys', 'Keys'),
         ('model attributes', 'Model Attributes'),
         ('option args', 'Option Args'),
+        ('tuple', 'Tuple'),
     ]
 
     extra_version_info_sections = [
@@ -348,8 +350,10 @@ class BeanbagDocstring(GoogleDocstring):
                     # processing.
                     self.queue_line(result)
 
-        return super(BeanbagDocstring, self)._consume_field(parse_type,
-                                                            *args, **kwargs)
+        name, type_str, desc = super(BeanbagDocstring, self)._consume_field(
+            parse_type, *args, **kwargs)
+
+        return (name, self.make_type_reference(type_str), desc)
 
     def peek_lines(self, num_lines=1):
         """Return the specified number of lines without consuming them.
@@ -415,6 +419,53 @@ class BeanbagDocstring(GoogleDocstring):
         else:
             # Sphinx < 5.1
             self._line_iter._cache.appendleft(line)
+
+    def make_type_reference(self, type_str):
+        """Create references to types in a type string.
+
+        This will parse the string, separating out a type from zero or more
+        suffixes (like ``, optional``).
+
+        The type will be further parsed into a space-separated tokens. Each
+        of those will be set as a reference, allowing Sphinx to try to link
+        it. The exceptions are the words "of" and "or", which we use to
+        list optional types.
+
+        The suffixes are each formatted with emphasis.
+
+        Version Added:
+            2.0
+
+        Args:
+            type_str (unicode):
+                The string to parse and create references from.
+
+        Returns:
+            unicode:
+            The new string.
+        """
+        if not type_str:
+            return type_str
+
+        type_aliases = self._config.napoleon_type_aliases or {}
+        parts = type_str.split(',')
+        type_parts = []
+
+        for type_part in parts[0].split(' '):
+            if type_part not in ('of', 'or'):
+                type_part = _convert_type_spec(type_part, type_aliases)
+
+            type_parts.append(type_part)
+
+        new_parts = [' '.join(type_parts)]
+
+        if len(parts) > 1:
+            new_parts += [
+                r' *%s*' % _part.strip()
+                for _part in parts[1:]
+            ]
+
+        return ','.join(new_parts)
 
 
 def _filter_members(app, what, name, obj, skip, options):
