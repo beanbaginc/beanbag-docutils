@@ -35,16 +35,29 @@ docs for :py:func:`github_linkcode_resolve` for more information.
 
 from __future__ import unicode_literals
 
+import ast
 import inspect
+import logging
 import re
 import subprocess
 import sys
 
+import six
+
+
+logger = logging.getLogger(__name__)
+
 
 GIT_BRANCH_CONTAINS_RE = re.compile(r'^\s*([^\s]+)\s+([0-9a-f]+)\s.*')
 
+# We'll store 5 items in the AST cache by default. This will ensure that we
+# don't re-parse the same tree any more often than we have to, and leave
+# room for some parallel processing if needed.
+_AST_CACHE_MAX_SIZE = 5
+
 
 _head_ref = None
+_ast_cache = []
 
 
 def _run_git(cmd):
@@ -55,7 +68,7 @@ def _run_git(cmd):
             A list of arguments to pass to :command:`git`.
 
     Returns:
-        str:
+        bytes:
         The resulting output from the command.
 
     Raises:
@@ -68,6 +81,8 @@ def _run_git(cmd):
 
     if ret_code:
         raise subprocess.CalledProcessError(ret_code, 'git')
+
+    assert isinstance(output, bytes)
 
     return output
 
@@ -109,7 +124,7 @@ def _git_get_nearest_tracking_branch(merge_base, remote='origin'):
                 not ref_name.endswith('/HEAD')):
 
                 distance = len(_run_git(['log',
-                                         '--pretty=format:%%H',
+                                         '--pretty=format:%H',
                                          '...%s' % sha]).splitlines())
 
                 if best_distance is None or distance < best_distance:
@@ -142,10 +157,116 @@ def _get_git_doc_ref(branch):
         try:
             tracking_branch = _git_get_nearest_tracking_branch(branch)
             _head_ref = _run_git(['rev-parse', tracking_branch]).strip()
+
+            if isinstance(_head_ref, bytes):
+                _head_ref = _head_ref.decode('utf-8')
         except subprocess.CalledProcessError:
             _head_ref = None
 
     return _head_ref
+
+
+def _find_path_in_ast_nodes(nodes, path):
+    """Return an AST node for an object path, if found.
+
+    This walks the AST tree, guided by the given identifier path, trying to
+    locate the referenced identifier.
+
+    If a node represented by the path can be found, the node will be returned.
+
+    Version Added:
+        2.0
+
+    Args:
+        nodes (list or ast.AST):
+            The list of nodes or the AST object to walk.
+
+        path (list of unicode):
+            The identifier path.
+
+    Returns:
+        ast.Node:
+        The node, if found, or ``None`` if not found.
+    """
+    name = path[0]
+
+    if not isinstance(nodes, list):
+        nodes = ast.iter_child_nodes(nodes)
+
+    for node in nodes:
+        # If this is an explicit assignment, check to see if any of the
+        # targets of the assignment is the path we're looking for.
+        if isinstance(node, ast.Assign):
+            target_names = {
+                _target.id
+                for _target in node.targets
+            }
+
+            if name in target_names:
+                # We found it. We're done, probably.
+                assert len(path) == 1
+                return node
+
+        # If this is anything else, see if it has the next name in the path.
+        if hasattr(node, 'name') and node.name == name:
+            if len(path) > 1:
+                # This is a match, but we have more to process. Recurse.
+                return _find_path_in_ast_nodes(node.body, path[1:])
+            else:
+                # This was the last part we needed. Return the node.
+                return node
+
+    return None
+
+
+def _find_ast_node_for_path(module, path):
+    """Return the AST node for an object path, if found.
+
+    Version Added:
+        2.0
+
+    Args:
+        module (module):
+            The module in which to begin the search.
+
+        path (unicode):
+            The ``.``-delimited path to the node.
+
+    Returns:
+        ast.Node:
+        The resulting node, if found, or ``None`` if not found.
+    """
+    global _ast_cache
+
+    tree = None
+
+    # See if we already have a parsed AST in cache.
+    for _tree, _module in _ast_cache:
+        if _module is module:
+            tree = _tree
+            break
+
+    if tree is None:
+        # We don't have one in cache, so build it and push the last item
+        # out of cache.
+        try:
+            lines = inspect.findsource(module)[0]
+            tree = ast.parse(''.join(lines))
+            _ast_cache = (
+                [(module, tree)] +
+                _ast_cache[:_AST_CACHE_MAX_SIZE - 1]
+            )
+        except Exception as e:
+            logger.exception('Failed to parse AST tree for %r: %s',
+                             module, e)
+            return None
+
+    try:
+        return _find_path_in_ast_nodes(tree, path)
+    except Exception as e:
+        logger.exception('Failed to look up object %s: %s',
+                         '.'.join(path), e)
+        return None
 
 
 def github_linkcode_resolve(domain, info, github_org_id, github_repo_id,
@@ -206,29 +327,32 @@ def github_linkcode_resolve(domain, info, github_org_id, github_repo_id,
 
     # Split that, trying to find the module at the very tail of the module
     # path.
-    obj = submod
+    node = _find_ast_node_for_path(submod, info['fullname'].split('.'))
 
-    for part in info['fullname'].split('.'):
-        try:
-            obj = getattr(obj, part)
-        except:
-            return None
-
-    # Find the line number of the thing being documented.
-    try:
-        linenum = inspect.findsource(obj)[1]
-    except:
-        linenum = None
+    if node is None:
+        return None
 
     # Build a reference for the line number in GitHub.
-    if linenum:
-        linespec = '#L%d' % (linenum + 1)
-    else:
-        linespec = ''
+    linespec = '#L%d' % node.lineno
 
     # Get the branch/tag/commit to link to.
     ref = _get_git_doc_ref(branch) or branch
+    assert isinstance(ref, six.text_type)
 
     return ('https://github.com/%s/%s/blob/%s/%s%s%s'
             % (github_org_id, github_repo_id, ref, source_prefix,
                filename, linespec))
+
+
+def clear_github_linkcode_caches():
+    """Clear the internal caches for GitHub code linking.
+
+    This is primarily intended for unit tests.
+
+    Version Added:
+        2.0
+    """
+    global _head_ref, _ast_cache
+
+    _head_ref = None
+    _ast_cache = []

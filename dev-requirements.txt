@@ -7,4 +7,5 @@ pytest~=7.0.1; python_version == "3.6"
 pytest~=7.1.2; python_version >= "3.7"
 pytest-env~=0.6.2
 
+kgb~=7.1
 sphinx-testing
