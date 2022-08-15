@@ -175,7 +175,10 @@ class BeanbagDocstring(GoogleDocstring):
     partial_typed_arg_end_re = re.compile(r'\s*(.+?)\s*\):$')
 
     extra_returns_sections = [
-        ('context', 'Context'),
+        ('context', 'Context', {}),
+        ('type', 'Type', {
+            'require_type': True,
+        }),
     ]
 
     extra_fields_sections = [
@@ -209,8 +212,8 @@ class BeanbagDocstring(GoogleDocstring):
         """
         super(BeanbagDocstring, self).__init__(*args, **kwargs)
 
-        for keyword, label in self.extra_returns_sections:
-            self.register_returns_section(keyword, label)
+        for keyword, label, options in self.extra_returns_sections:
+            self.register_returns_section(keyword, label, options)
 
         for keyword, label in self.extra_fields_sections:
             self.register_fields_section(keyword, label)
@@ -220,7 +223,7 @@ class BeanbagDocstring(GoogleDocstring):
 
         self._parse(True)
 
-    def register_returns_section(self, keyword, label):
+    def register_returns_section(self, keyword, label, options={}):
         """Register a Returns-like section with the given keyword and label.
 
         Args:
@@ -229,9 +232,24 @@ class BeanbagDocstring(GoogleDocstring):
 
             label (unicode):
                 The label outputted in the section.
+
+            options (dict, optional):
+                Options for the registration.
+
+                This accepts:
+
+                Keys:
+                    require_type (bool, optional):
+                        Whether the type is required, and assumed to be the
+                        first line.
+
+                Version Added:
+                    2.0
         """
         self._sections[keyword] = lambda *args: \
-            self._format_fields(label, self._consume_returns_section())
+            self._format_fields(
+                label,
+                self._consume_returns_section(**options))
 
     def register_fields_section(self, keyword, label):
         """Register a fields section with the given keyword and label.
@@ -391,6 +409,50 @@ class BeanbagDocstring(GoogleDocstring):
             parse_type, *args, **kwargs)
 
         return (name, self.make_type_reference(type_str), desc)
+
+    def _consume_returns_section(self, *args, **kwargs):
+        """Consume a returns section, converting and handling types.
+
+        This enhances the default version from Napoleon to allow for
+        return-like sections lacking a description, and to intelligently
+        process type references.
+
+        Version Added:
+            2.0:
+            This is the first release to override this functionality.
+
+        Args:
+            require_type (bool, optional):
+                Whether to assume the first line is a type.
+
+            *args (tuple):
+                Position arguments to pass to the paren method.
+
+            **kwargs (dict):
+                Keyword arguments to pass to the paren method.
+
+        Returns:
+            tuple:
+            Information on the field. The format is dependent on the parent
+            method.
+        """
+        if kwargs.pop('require_type', False):
+            lines = self.peek_lines(1)
+
+            if lines:
+                param_line = lines[0].rstrip()
+
+                if not param_line.endswith(':'):
+                    self.consume_lines(1)
+                    self.queue_line('%s:' % param_line)
+
+        nodes = super(BeanbagDocstring, self)._consume_returns_section(
+            *args, **kwargs)
+
+        return [
+            (name, self.make_type_reference(type_str), desc)
+            for name, type_str, desc in nodes
+        ]
 
     def peek_lines(self, num_lines=1):
         """Return the specified number of lines without consuming them.

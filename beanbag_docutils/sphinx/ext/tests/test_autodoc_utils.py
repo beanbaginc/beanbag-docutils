@@ -301,7 +301,7 @@ class BeanbagDocstringTests(SphinxExtTestCase):
                 '    dict:\n'
                 '    Description of the context.\n'
             ),
-            ':Context: *dict* -- Description of the context.\n'
+            ':Context: :class:`dict` -- Description of the context.\n'
         )
 
     def test_deprecated_section_with_version(self):
@@ -437,6 +437,27 @@ class BeanbagDocstringTests(SphinxExtTestCase):
                 '        * **1** (:class:`dict`) -- Description 2\n'
                 '        * **2** (:class:`int`, *optional*) -- Description 3\n'
             ))
+
+    def test_type_section(self):
+        """Testing Beanbag docstring with Type section"""
+        self.assertEqual(
+            self._render_docstring(
+                'Type:\n'
+                '    dict\n'
+            ),
+            ':Type: :class:`dict`\n'
+        )
+
+    def test_type_section_with_description(self):
+        """Testing Beanbag docstring with Type section with description"""
+        self.assertEqual(
+            self._render_docstring(
+                'Type:\n'
+                '    dict:\n'
+                '    Description.\n'
+            ),
+            ':Type: :class:`dict` -- Description.\n'
+        )
 
     def test_version_added_section_with_version(self):
         """Testing Beanbag docstring with Version Added section with version"""
