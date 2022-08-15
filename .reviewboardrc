@@ -1,8 +1,8 @@
 REVIEWBOARD_URL = 'https://reviews.reviewboard.org'
 REPOSITORY = 'beanbag-docutils'
-BRANCH = 'master'
-TRACKING_BRANCH = 'origin/master'
-LAND_DEST_BRANCH = 'master'
+BRANCH = 'release-1.x'
+TRACKING_BRANCH = 'origin/%s' % BRANCH
+LAND_DEST_BRANCH = BRANCH
 
 ALIASES = {
     'clear-pycs': '!find . -name *.pyc -delete',
