@@ -22,6 +22,9 @@ class DocClass1(object):
     def foo(self):
         pass
 
+    def bar(self):
+        pass
+
 
 class DocClass2(object):
     def foo(self):
@@ -42,8 +45,6 @@ class AutoDocExcludesTests(SphinxExtTestCase):
     }
 
     extensions = [
-        'sphinx.ext.autodoc',
-        'sphinx.ext.napoleon',
         autodoc_utils.__name__,
     ]
 
@@ -64,14 +65,6 @@ class AutoDocExcludesTests(SphinxExtTestCase):
                                       DocClass2.__name__),
         ])
 
-        # Make sure our attributes are here by default.
-        rendered = self.render_doc(doc)
-
-        self.assertIn('__dict__', rendered)
-        self.assertIn('foo', rendered)
-        self.assertIn('__module__', rendered)
-
-        # Now exclude them.
         rendered = self.render_doc(
             doc,
             config={
@@ -85,6 +78,48 @@ class AutoDocExcludesTests(SphinxExtTestCase):
         self.assertNotIn('foo', rendered)
         self.assertIn('__module__', rendered)
 
+    def test_with_wildcard_exclude_with_defaults(self):
+        """Testing autodoc_excludes with wildcard (*) exclude list with
+        defaults
+        """
+        doc = '\n'.join([
+            '.. autoclass:: %s.%s' % (DocClass1.__module__,
+                                      DocClass2.__name__),
+            '',
+            '.. autoclass:: %s.%s' % (DocClass1.__module__,
+                                      DocClass2.__name__),
+        ])
+
+        rendered = self.render_doc(doc)
+
+        self.assertIn('foo', rendered)
+
+    def test_with_wildcard_exclude_added_to_defaults(self):
+        """Testing autodoc_excludes with wildcard (*) exclude list added to
+        defaults
+        """
+        doc = '\n'.join([
+            '.. autoclass:: %s.%s' % (DocClass1.__module__,
+                                      DocClass1.__name__),
+            '',
+            '.. autoclass:: %s.%s' % (DocClass2.__module__,
+                                      DocClass2.__name__),
+        ])
+
+        rendered = self.render_doc(
+            doc,
+            config={
+                'autodoc_excludes': {
+                    '__defaults__': True,
+                    '*': ['foo'],
+                },
+            }
+        )
+
+        self.assertNotIn('__dict__', rendered)
+        self.assertNotIn('foo', rendered)
+        self.assertNotIn('__module__', rendered)
+
     def test_with_class_attr_exclude(self):
         """Testing autodoc_excludes with class exclude list"""
         docclass1_path = '%s.%s' % (DocClass1.__module__, DocClass1.__name__)
@@ -92,19 +127,9 @@ class AutoDocExcludesTests(SphinxExtTestCase):
         doc = '\n'.join([
             '.. autoclass:: %s' % docclass1_path,
             '',
-            '.. autoclass:: %s.%s' % (DocClass1.__module__,
+            '.. autoclass:: %s.%s' % (DocClass2.__module__,
                                       DocClass2.__name__),
         ])
-
-        # Make sure the attributes on these classes are here by default.
-        rendered = self.render_doc(doc)
-
-        self.assertIn('DocClass1.__dict__', rendered)
-        self.assertIn('DocClass1.__module__', rendered)
-        self.assertIn('DocClass1.foo', rendered)
-        self.assertIn('DocClass2.__dict__', rendered)
-        self.assertIn('DocClass2.__module__', rendered)
-        self.assertIn('DocClass2.foo', rendered)
 
         # Now exclude them.
         rendered = self.render_doc(
@@ -117,11 +142,88 @@ class AutoDocExcludesTests(SphinxExtTestCase):
         )
 
         self.assertIn('DocClass1.__module__', rendered)
+        self.assertIn('DocClass2.__module__', rendered)
+        self.assertIn('DocClass1.bar', rendered)
         self.assertNotIn('DocClass1.__dict__', rendered)
         self.assertNotIn('DocClass1.foo', rendered)
-        self.assertIn('DocClass2.__module__', rendered)
         self.assertNotIn('DocClass2.__dict__', rendered)
         self.assertNotIn('DocClass2.foo', rendered)
+
+    def test_with_class_attr_exclude_with_defaults(self):
+        """Testing autodoc_excludes with class exclude list with defaults"""
+        docclass1_path = '%s.%s' % (DocClass1.__module__, DocClass1.__name__)
+
+        doc = '\n'.join([
+            '.. autoclass:: %s' % docclass1_path,
+            '',
+            '.. autoclass:: %s.%s' % (DocClass2.__module__,
+                                      DocClass2.__name__),
+        ])
+
+        # Make sure the attributes on these classes are here by default.
+        rendered = self.render_doc(doc)
+
+        self.assertIn('DocClass1.foo', rendered)
+        self.assertIn('DocClass1.bar', rendered)
+        self.assertIn('DocClass2.foo', rendered)
+        self.assertNotIn('DocClass1.__dict__', rendered)
+        self.assertNotIn('DocClass1.__module__', rendered)
+        self.assertNotIn('DocClass2.__dict__', rendered)
+        self.assertNotIn('DocClass2.__module__', rendered)
+
+    def test_with_class_attr_exclude_and_added_to_defaults(self):
+        """Testing autodoc_excludes with class exclude list and added with
+        defaults
+        """
+        docclass1_path = '%s.%s' % (DocClass1.__module__, DocClass1.__name__)
+
+        doc = '\n'.join([
+            '.. autoclass:: %s' % docclass1_path,
+            '',
+            '.. autoclass:: %s.%s' % (DocClass1.__module__,
+                                      DocClass2.__name__),
+        ])
+
+        # Now exclude them.
+        rendered = self.render_doc(
+            doc,
+            config={
+                'autodoc_excludes': {
+                    '__defaults__': True,
+                    'class': ['foo'],
+                },
+            }
+        )
+
+        self.assertIn('DocClass1.bar', rendered)
+        self.assertNotIn('DocClass1.__module__', rendered)
+        self.assertNotIn('DocClass1.__dict__', rendered)
+        self.assertNotIn('DocClass1.foo', rendered)
+        self.assertNotIn('DocClass2.__module__', rendered)
+        self.assertNotIn('DocClass2.__dict__', rendered)
+        self.assertNotIn('DocClass2.foo', rendered)
+
+    def test_with_empty_excludes(self):
+        """Testing autodoc_excludes with empty excludes"""
+        doc = '\n'.join([
+            '.. autoclass:: %s.%s' % (DocClass1.__module__,
+                                      DocClass1.__name__),
+            '',
+            '.. autoclass:: %s.%s' % (DocClass2.__module__,
+                                      DocClass2.__name__),
+        ])
+
+        # Make sure some our attributes are here by default.
+        rendered = self.render_doc(
+            doc,
+            config={
+                'autodoc_excludes': {},
+            })
+
+        self.assertIn('__dict__', rendered)
+        self.assertIn('foo', rendered)
+        self.assertIn('__module__', rendered)
+        self.assertIn('DocClass1.__module__', rendered)
 
     def test_with_deprecated(self):
         """Testing autodoc_excludes with __deprecated__ in module"""
@@ -135,8 +237,6 @@ class BeanbagDocstringTests(SphinxExtTestCase):
     """Unit tests for BeanbagDocstring."""
 
     extensions = [
-        'sphinx.ext.autodoc',
-        'sphinx.ext.napoleon',
         autodoc_utils.__name__,
     ]
 

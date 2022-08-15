@@ -69,6 +69,25 @@ more information. You can configure this in :file:`conf.py` by doing::
 
 That's just an example, but a useful one for Django users.
 
+By default, ``autodoc_excludes`` is set to::
+
+    autodoc_excludes = {
+        # Applies to modules, classes, and anything else.
+        '*': [
+            '__dict__',
+            '__doc__',
+            '__module__',
+            '__weakref__',
+        ],
+    }
+
+If overriding, you can set ``'__defaults__': True`` to merge your changes in
+with these defaults.
+
+.. versionchanged:: 2.0
+   Changed from a default of an empty dictionary, and added the
+   ``__defaults__`` option.
+
 
 .. _autodoc-skip-member:
    http://www.sphinx-doc.org/en/stable/ext/autodoc.html#event-autodoc-skip-member
@@ -76,6 +95,11 @@ That's just an example, but a useful one for Django users.
 
 Setup
 =====
+
+.. versionchanged:: 2.0
+   Improved setup by enabling other default extensions and options when
+   enabling this extension.
+
 
 To use this, add the extension in :file:`conf.py`::
 
@@ -85,17 +109,21 @@ To use this, add the extension in :file:`conf.py`::
         ...
     ]
 
-If you want to use the Beanbag docstring format, you'll need::
+This will automatically enable the :py:mod:`sphinx.ext.autodoc`,
+:py:mod:`sphinx.ext.intersphinx`, and :py:mod:`sphinx.ext.napoleon` extensions,
+and enable the following autodoc options::
 
-    extensions = [
-        ...
-        'sphinx.ext.napoleon',
-        'beanbag_docutils.sphinx.ext.autodoc_utils',
-        ...
-    ]
+    autodoc_member_order = 'bysource'
+    autoclass_content = 'class'
+    autodoc_default_options = {
+        'members': True,
+        'special-members': True,
+        'undoc-members': True,
+        'show-inheritance': True,
+    }
 
-    napoleon_beanbag_docstring = True
-    napoleon_google_docstring = False
+These default options can be turned off by setting
+``use_beanbag_autodoc_defaults=False``.
 
 
 Configuration
@@ -105,7 +133,14 @@ Configuration
     Optional global exclusions to apply, as shown above.
 
 ``napoleon_beanbag_docstring``
-    Enable parsing of the Beanbag docstring format.
+    Set whether the Beanbag docstring format should be used.
+
+    This is the default as of ``beanbag-docutils`` 2.0.
+
+``use_beanbag_autodoc_defaults``
+    Set whether autodoc defaults should be used.
+
+    .. versionadded:: 2.0
 """
 
 from __future__ import unicode_literals
@@ -116,6 +151,8 @@ import sys
 import six
 from sphinx import version_info
 from sphinx.ext.napoleon.docstring import GoogleDocstring, _convert_type_spec
+
+from beanbag_docutils import VERSION
 
 
 class BeanbagDocstring(GoogleDocstring):
@@ -511,7 +548,7 @@ def _filter_members(app, what, name, obj, skip, options):
     module = sys.modules[module_name]
 
     # Check if the module itself is excluding this from the docs.
-    module_excludes = set(getattr(module, '__autodoc_excludes__', []))
+    module_excludes = getattr(module, '__autodoc_excludes__', [])
 
     if name in module_excludes:
         return True
@@ -561,6 +598,100 @@ def _process_docstring(app, what, name, obj, options, lines):
         lines[:] = docstring.lines()[:]
 
 
+def _on_config_inited(app, config):
+    """Override default configuration settings for Napoleon.
+
+    This will ensure that some of our defaults take place for Beanbag
+    docstring rendering.
+
+    Version Added:
+        2.0
+
+    Args:
+        app (sphinx.application.Sphinx):
+            The Sphinx application to override configuration on.
+
+        config (sphinx.config.Config):
+            The Sphinx configuration to override.
+    """
+    if config.use_beanbag_autodoc_defaults:
+        # Turn off competing docstring parsers.
+        config.napoleon_google_docstring = False
+        config.napoleon_numpy_docstring = False
+
+        # Force this off so that we can handle this ourselves when consuming a
+        # field.
+        config.napoleon_preprocess_types = False
+
+        # Change some defaults.
+        config.values['autodoc_member_order'] = \
+            ('bysource',) + config.values['autodoc_member_order'][1:]
+        config.values['autoclass_content'] = \
+            ('class',) + config.values['autoclass_content'][1:]
+
+        config.autodoc_default_options = dict({
+            'members': True,
+            'special-members': True,
+            'undoc-members': True,
+            'show-inheritance': True,
+        }, **(config.autodoc_default_options or {}))
+
+    # Register type aliases.
+    if config.napoleon_type_aliases is None:
+        config.napoleon_type_aliases = {}
+
+    if 'python' in config.intersphinx_mapping:
+        python_intersphinx = config.intersphinx_mapping['python'][0]
+
+        if python_intersphinx is not None:
+            if python_intersphinx.startswith('https://docs.python.org/2'):
+                # Python 2
+                #
+                # Note that 'list' does not have corresponding type
+                # documentation in Python 2.
+                config.napoleon_type_aliases.update({
+                    'tuple': ':py:func:`tuple <tuple>`',
+                    'unicode': ':py:func:`unicode <unicode>`',
+                })
+            else:
+                # Python 3
+                config.napoleon_type_aliases.update({
+                    'list': ':py:class:`list`',
+                    'tuple': ':py:class:`tuple`',
+                    'unicode': ':py:class:`unicode <str>`',
+                })
+
+    # Update autodoc_excludes to include defaults if requested.
+    #
+    # We'll also ensure all lists are sets, to make processing faster.
+    if config.autodoc_excludes.get('__defaults__'):
+        new_autodoc_excludes = {
+            '*': {
+                '__dict__',
+                '__doc__',
+                '__module__',
+                '__weakref__',
+            },
+        }
+
+        if '*' in config.autodoc_excludes:
+            new_autodoc_excludes['*'].update(config.autodoc_excludes['*'])
+
+        new_autodoc_excludes.update({
+            key: set(value)
+            for key, value in six.iteritems(config.autodoc_excludes)
+            if key not in ('*', '__defaults__')
+        })
+    else:
+        new_autodoc_excludes = {
+            key: set(value)
+            for key, value in six.iteritems(config.autodoc_excludes)
+            if key != '__defaults__'
+        }
+
+    config.autodoc_excludes = new_autodoc_excludes
+
+
 def setup(app):
     """Set up the Sphinx extension.
 
@@ -572,8 +703,19 @@ def setup(app):
             The Sphinx application to register configuration and listen to
             events on.
     """
-    app.add_config_value('autodoc_excludes', {}, True)
-    app.add_config_value('napoleon_beanbag_docstring', False, True)
+    app.setup_extension('sphinx.ext.autodoc')
+    app.setup_extension('sphinx.ext.intersphinx')
+    app.setup_extension('sphinx.ext.napoleon')
+
+    app.add_config_value('use_beanbag_autodoc_defaults', True, True)
+    app.add_config_value('autodoc_excludes', {'__defaults__': True}, True)
+    app.add_config_value('napoleon_beanbag_docstring', True, True)
 
     app.connect('autodoc-skip-member', _filter_members)
     app.connect('autodoc-process-docstring', _process_docstring)
+    app.connect('config-inited', _on_config_inited)
+
+    return {
+        'version': VERSION,
+        'parallel_read_safe': True,
+    }
