@@ -220,7 +220,32 @@ class BeanbagDocstringTests(SphinxExtTestCase):
             (
                 '.. deprecated:: 2.0\n'
                 '\n'
-                '    Description of the deprecation.\n'
+                '   Description of the deprecation.\n'
+            )
+        )
+
+    def test_deprecated_section_with_version_and_lists(self):
+        """Testing Beanbag docstring with Deprecated section with lists"""
+        self.assertEqual(
+            self._render_docstring(
+                'Deprecated:\n'
+                '    2.0:\n'
+                '    * This is item one and it\n'
+                '      wraps across multiple\n'
+                '      lines\n'
+                '\n'
+                '    * And this is item 2.\n'
+                '      Still multiple lines.\n'
+            ),
+            (
+                '.. deprecated:: 2.0\n'
+                '\n'
+                '   * This is item one and it\n'
+                '     wraps across multiple\n'
+                '     lines\n'
+                '   \n'
+                '   * And this is item 2.\n'
+                '     Still multiple lines.\n'
             )
         )
 
@@ -291,7 +316,32 @@ class BeanbagDocstringTests(SphinxExtTestCase):
             (
                 '.. versionadded:: 2.0\n'
                 '\n'
-                '    Description of the addition.\n'
+                '   Description of the addition.\n'
+            )
+        )
+
+    def test_version_added_section_with_lists(self):
+        """Testing Beanbag docstring with Version Added section with lists"""
+        self.assertEqual(
+            self._render_docstring(
+                'Version Added:\n'
+                '    2.0:\n'
+                '    * This is item one and it\n'
+                '      wraps across multiple\n'
+                '      lines\n'
+                '\n'
+                '    * And this is item 2.\n'
+                '      Still multiple lines.\n'
+            ),
+            (
+                '.. versionadded:: 2.0\n'
+                '\n'
+                '   * This is item one and it\n'
+                '     wraps across multiple\n'
+                '     lines\n'
+                '   \n'
+                '   * And this is item 2.\n'
+                '     Still multiple lines.\n'
             )
         )
 
@@ -306,7 +356,32 @@ class BeanbagDocstringTests(SphinxExtTestCase):
             (
                 '.. versionchanged:: 2.0\n'
                 '\n'
-                '    Description of the change.\n'
+                '   Description of the change.\n'
+            )
+        )
+
+    def test_version_changed_section_with_lists(self):
+        """Testing Beanbag docstring with Version Changed section with lists"""
+        self.assertEqual(
+            self._render_docstring(
+                'Version Changed:\n'
+                '    2.0:\n'
+                '    * This is item one and it\n'
+                '      wraps across multiple\n'
+                '      lines\n'
+                '\n'
+                '    * And this is item 2.\n'
+                '      Still multiple lines.\n'
+            ),
+            (
+                '.. versionchanged:: 2.0\n'
+                '\n'
+                '   * This is item one and it\n'
+                '     wraps across multiple\n'
+                '     lines\n'
+                '   \n'
+                '   * And this is item 2.\n'
+                '     Still multiple lines.\n'
             )
         )
 

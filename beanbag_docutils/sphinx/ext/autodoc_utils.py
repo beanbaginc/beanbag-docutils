@@ -246,10 +246,10 @@ class BeanbagDocstring(GoogleDocstring):
 
             return (
                 ['.. %s:: %s' % (admonition, param_line), ''] +
-                self._indent(self._dedent(lines[1:], 3)) + ['']
+                self._indent(self._dedent(lines[1:]), 3) + ['']
             )
-
-        return ['.. %s::' % admonition, '']
+        else:
+            return ['.. %s::' % admonition, '']
 
     def _parse(self, parse=False):
         """Parse the docstring.
