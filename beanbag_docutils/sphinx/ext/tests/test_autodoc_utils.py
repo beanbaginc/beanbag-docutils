@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 import six
 
+from beanbag_docutils.sphinx.ext import autodoc_utils
 from beanbag_docutils.sphinx.ext.autodoc_utils import BeanbagDocstring
 from beanbag_docutils.sphinx.ext.tests.testcase import SphinxExtTestCase
 
@@ -43,7 +44,7 @@ class AutoDocExcludesTests(SphinxExtTestCase):
     extensions = [
         'sphinx.ext.autodoc',
         'sphinx.ext.napoleon',
-        'beanbag_docutils.sphinx.ext.autodoc_utils',
+        autodoc_utils.__name__,
     ]
 
     def test_with_autodoc_excludes(self):
@@ -132,6 +133,12 @@ class AutoDocExcludesTests(SphinxExtTestCase):
 
 class BeanbagDocstringTests(SphinxExtTestCase):
     """Unit tests for BeanbagDocstring."""
+
+    extensions = [
+        'sphinx.ext.autodoc',
+        'sphinx.ext.napoleon',
+        autodoc_utils.__name__,
+    ]
 
     def test_args_section(self):
         """Testing Beanbag docstring with Args section"""
@@ -437,7 +444,9 @@ class BeanbagDocstringTests(SphinxExtTestCase):
             unicode:
             The resulting ReStructuredText.
         """
-        return six.text_type(BeanbagDocstring(content))
+        with self.with_sphinx_env() as ctx:
+            return six.text_type(BeanbagDocstring(content,
+                                                  config=ctx['config']))
 
 
 __autodoc_excludes__ = ['IgnoredModule']

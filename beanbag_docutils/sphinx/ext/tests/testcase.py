@@ -5,9 +5,10 @@ from __future__ import unicode_literals
 import os
 import shutil
 import tempfile
+from contextlib import contextmanager
 from unittest import TestCase
 
-from sphinx_testing import with_app
+from sphinx_testing.util import TestApp, docutils_namespace
 
 import beanbag_docutils
 
@@ -32,6 +33,54 @@ class SphinxExtTestCase(TestCase):
 
     maxDiff = 1000000
 
+    @contextmanager
+    def with_sphinx_env(self, config={}):
+        """Run within a Sphinx environment.
+
+        Version Added:
+            1.10
+
+        Args:
+            config (dict, optional):
+                Additional configuration to set for phinx.
+
+        Context:
+            dict:
+            A dictionary containing:
+
+            Keys:
+                app (sphinx.application.Sphinx):
+                    The Sphinx application that was set up.
+
+                config (sphinx.config.Config):
+                    The Sphinx configuration object.
+
+                srcdir (unicode):
+                    The location to place ReST source files in.
+        """
+        new_config = {
+            'extensions': self.extensions,
+            'html_theme': 'test',
+            'html_theme_path': [_theme_path],
+        }
+        new_config.update(self.config)
+        new_config.update(config)
+
+        with docutils_namespace():
+            app = TestApp(buildername='html',
+                          create_new_srcdir=True,
+                          copy_srcdir_to_tmpdir=False,
+                          confoverrides=new_config)
+
+            try:
+                yield {
+                    'app': app,
+                    'config': app.config,
+                    'srcdir': app.srcdir,
+                }
+            finally:
+                app.cleanup()
+
     def render_doc(self, doc_content, config={}):
         """Render a ReST document to a string.
 
@@ -51,26 +100,11 @@ class SphinxExtTestCase(TestCase):
             unicode:
             The rendered content.
         """
-        srcdir = tempfile.mkdtemp(suffix='beanbag-docutils-tests.')
+        with self.with_sphinx_env(config=config) as ctx:
+            with open(os.path.join(ctx['srcdir'], 'contents.rst'), 'w') as fp:
+                fp.write(doc_content)
 
-        # This file needs to be present, even if it's blank.
-        with open(os.path.join(srcdir, 'conf.py'), 'w') as fp:
-            pass
-
-        with open(os.path.join(srcdir, 'contents.rst'), 'w') as fp:
-            fp.write(doc_content)
-
-        new_config = {
-          'extensions': self.extensions,
-          'html_theme': 'test',
-          'html_theme_path': [_theme_path],
-        }
-        new_config.update(self.config)
-        new_config.update(config)
-
-        @with_app(buildername='html', srcdir=srcdir,
-                  copy_srcdir_to_tmpdir=False, confoverrides=new_config)
-        def _render(app, status, warning):
+            app = ctx['app']
             app.build()
 
             result = (app.outdir / 'contents.html').read_text().strip()
@@ -79,8 +113,3 @@ class SphinxExtTestCase(TestCase):
                 result = result.decode('utf-8')
 
             return result
-
-        try:
-            return _render()
-        finally:
-            shutil.rmtree(srcdir)
