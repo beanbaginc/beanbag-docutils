@@ -17,6 +17,13 @@ Beanbag-related products, including:
 .. _RBTools: https://github.com/reviewboard/rbtools/
 
 
+Compatibility
+=============
+
+* beanbag-docutils 2.x supports Python 3.6-3.11.
+* beanbag-docutils 1.x supports Python 2.7 and 3.6-3.10.
+
+
 Getting Started
 ===============
 
