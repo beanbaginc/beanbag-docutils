@@ -107,9 +107,5 @@ class SphinxExtTestCase(TestCase):
             app = ctx['app']
             app.build()
 
-            result = (app.outdir / 'contents.html').read_text().strip()
-
-            if isinstance(result, bytes):
-                result = result.decode('utf-8')
-
-            return result
+            with open(app.outdir / 'contents.html', 'r') as fp:
+                return fp.read().strip()
