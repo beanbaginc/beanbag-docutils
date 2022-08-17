@@ -1,0 +1,122 @@
+====================
+beanbag-docutils 2.0
+====================
+
+**Release date:** TBD
+
+
+Compatibility
+=============
+
+* Dropped support for Python 2.7 and added Python 3.11.
+
+  Beanbag Docutils now supports 3.6 through 3.11.
+
+
+beanbag_docutils.sphinx.ext.autodoc_utils
+=========================================
+
+* This module now sets a handful of default Sphinx configuration settings:
+
+  .. code-block:: python
+
+     extensions = [
+         'sphinx.ext.autodoc,',
+         'sphinx.ext.intersphinx',
+         'sphinx.ext.napoleon',
+     ]
+
+     autodoc_member_order = 'bysource'
+     autoclass_content = 'class'
+     autodoc_default_options = {
+         'members': True,
+         'special-members': True,
+         'undoc-members': True,
+         'show-inheritance': True,
+     }
+
+  To disable these defaults, set:
+
+  .. code-block:: python
+
+     use_beanbag_autodoc_defaults = False
+
+* Added support for a ``Keys`` section.
+
+  This is used to document dictionaries and other similar content. It works
+  as a section nested within a paragraph and resembles ``Args`` or
+  ``Attributes``.
+
+  For example:
+
+  .. code-block:: restructuredtext
+
+     Here is a description of some dictionary:
+
+     Keys:
+         key1 (str):
+            Description of the key.
+
+         key2 (collections.OrderedDict, optional):
+            And a description of another key.
+
+* Added support for a ``Tuple`` section.
+
+  This is used to document tuples. It also works as a section nested within a
+  paragraph, and resembles ``Args`` or ``Attributes``.
+
+  For example:
+
+  .. code-block:: restructuredtext
+
+     Here is a description of some tuple:
+
+     Tuple:
+         1 (int):
+            Description of the first item.
+
+         2 (bool):
+            And a description of the second.
+
+         3 (django.db.models.Model):
+            And finally the third.
+
+* Added support for a ``Type`` section.
+
+  This is used to document the type of an attribute or property. It works
+  similarly to a ``Returns`` section, with the description being optional.
+
+  For example:
+
+  .. code-block:: restructuredtext
+
+     This attribute does a thing.
+
+     Type:
+         path.to.MyObject
+
+* Fixed including list items in ``Version Added``, ``Version Changed``, and
+  ``Deprecated`` sections.
+
+
+beanbag_docutils.sphinx.ext.github
+==================================
+
+* Improved several aspects of linking to Python code on GitHub.
+
+  This can now handle linking to attributes, variables, and
+  dynamically-generated objects like named tuples.
+
+  The entire way of linking has been redone, now taking advantage of the
+  Python AST to determine the correct line numbers to content, rather than
+  an older approach that only supported typical classes, functions, and
+  methods.
+
+* Fixed regressions in linking to code on GitHub when building on Python 3.
+
+
+Contributors
+============
+
+* Christian Hammond
+* David Trowbridge
