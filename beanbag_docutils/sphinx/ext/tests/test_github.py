@@ -65,7 +65,7 @@ class GitHubLinkCodeResolveTests(kgb.SpyAgency, SphinxExtTestCase):
             url,
             'https://github.com/beanbaginc/beanbag_docutils/blob/'
             '55ca6286e3e4f4fba5d0448333fa99fc5a404a73/beanbag_docutils/'
-            'sphinx/ext/tests/testdata/github_linkcode_module.py#L7')
+            'sphinx/ext/tests/testdata/github_linkcode_module.py#L9')
 
         self.assertSpyCallCount(_run_git, 4)
 
@@ -112,11 +112,11 @@ class GitHubLinkCodeResolveTests(kgb.SpyAgency, SphinxExtTestCase):
             url,
             'https://github.com/beanbaginc/beanbag_docutils/blob/'
             '55ca6286e3e4f4fba5d0448333fa99fc5a404a73/beanbag_docutils/'
-            'sphinx/ext/tests/testdata/github_linkcode_module.py#L19')
+            'sphinx/ext/tests/testdata/github_linkcode_module.py#L21')
 
         self.assertSpyCallCount(_run_git, 4)
 
-    def test_with_link_to_clasS_attr(self):
+    def test_with_link_to_class_attr(self):
         """Testing github_linkcode_resolve with linking to class attribute"""
         self.spy_on(_run_git, op=kgb.SpyOpMatchInOrder([
             {
@@ -159,7 +159,7 @@ class GitHubLinkCodeResolveTests(kgb.SpyAgency, SphinxExtTestCase):
             url,
             'https://github.com/beanbaginc/beanbag_docutils/blob/'
             '55ca6286e3e4f4fba5d0448333fa99fc5a404a73/beanbag_docutils/'
-            'sphinx/ext/tests/testdata/github_linkcode_module.py#L10')
+            'sphinx/ext/tests/testdata/github_linkcode_module.py#L12')
 
         self.assertSpyCallCount(_run_git, 4)
 
@@ -206,7 +206,7 @@ class GitHubLinkCodeResolveTests(kgb.SpyAgency, SphinxExtTestCase):
             url,
             'https://github.com/beanbaginc/beanbag_docutils/blob/'
             '55ca6286e3e4f4fba5d0448333fa99fc5a404a73/beanbag_docutils/'
-            'sphinx/ext/tests/testdata/github_linkcode_module.py#L22')
+            'sphinx/ext/tests/testdata/github_linkcode_module.py#L25')
 
         self.assertSpyCallCount(_run_git, 4)
 
@@ -253,7 +253,56 @@ class GitHubLinkCodeResolveTests(kgb.SpyAgency, SphinxExtTestCase):
             url,
             'https://github.com/beanbaginc/beanbag_docutils/blob/'
             '55ca6286e3e4f4fba5d0448333fa99fc5a404a73/beanbag_docutils/'
-            'sphinx/ext/tests/testdata/github_linkcode_module.py#L15')
+            'sphinx/ext/tests/testdata/github_linkcode_module.py#L17')
+
+        self.assertSpyCallCount(_run_git, 4)
+
+    def test_with_link_to_object_attr_not_in_code(self):
+        """Testing github_linkcode_resolve with linking to an attribute on an
+        object not defined in code
+        """
+        self.spy_on(_run_git, op=kgb.SpyOpMatchInOrder([
+            {
+                'args': (['fetch', 'origin', 'mybranch', 'origin'],),
+                'call_original': False,
+            },
+            {
+                'args': (['branch', '-rv', '--contains', 'mybranch'],),
+                'op': kgb.SpyOpReturn(
+                    b'  origin/mybranch abcd123 Here is a commit.\n'
+                ),
+            },
+            {
+                'args': (['log', '--pretty=format:%H', '...abcd123'],),
+                'op': kgb.SpyOpReturn(
+                    b'157ac365d792c79987966e0152d16d6d1526b24d\n'
+                ),
+            },
+            {
+                'args': (['rev-parse', 'mybranch'],),
+                'op': kgb.SpyOpReturn(
+                    b'55ca6286e3e4f4fba5d0448333fa99fc5a404a73\n'
+                ),
+            },
+        ]))
+
+        url = github_linkcode_resolve(
+            domain='py',
+            info={
+                'module': self.SRC_MODULE,
+                'fullname': 'MyNamedTuple.__match_args__',
+            },
+            github_org_id='beanbaginc',
+            github_repo_id='beanbag_docutils',
+            branch='mybranch')
+
+        self.assertIsNotNone(url)
+        self.assertIsInstance(url, six.text_type)
+        self.assertEqual(
+            url,
+            'https://github.com/beanbaginc/beanbag_docutils/blob/'
+            '55ca6286e3e4f4fba5d0448333fa99fc5a404a73/beanbag_docutils/'
+            'sphinx/ext/tests/testdata/github_linkcode_module.py#L27')
 
         self.assertSpyCallCount(_run_git, 4)
 
@@ -303,7 +352,7 @@ class GitHubLinkCodeResolveTests(kgb.SpyAgency, SphinxExtTestCase):
             url,
             'https://github.com/beanbaginc/beanbag_docutils/blob/'
             '55ca6286e3e4f4fba5d0448333fa99fc5a404a73/beanbag_docutils/'
-            'sphinx/ext/tests/testdata/github_linkcode_module.py#L15')
+            'sphinx/ext/tests/testdata/github_linkcode_module.py#L17')
 
         self.assertSpyCallCount(_run_git, 4)
 
@@ -372,7 +421,7 @@ class GitHubLinkCodeResolveTests(kgb.SpyAgency, SphinxExtTestCase):
             'https://github.com/beanbaginc/beanbag_docutils/blob/'
             '55ca6286e3e4f4fba5d0448333fa99fc5a404a73/foo/bar/'
             'beanbag_docutils/sphinx/ext/tests/testdata/'
-            'github_linkcode_module.py#L15')
+            'github_linkcode_module.py#L17')
 
         self.assertSpyCallCount(_run_git, 4)
 
@@ -429,7 +478,7 @@ class GitHubLinkCodeResolveTests(kgb.SpyAgency, SphinxExtTestCase):
             'https://github.com/beanbaginc/beanbag_docutils/blob/'
             '55ca6286e3e4f4fba5d0448333fa99fc5a404a73/foo/bar/'
             'beanbag_docutils/sphinx/ext/tests/testdata/'
-            'github_linkcode_module.py#L15')
+            'github_linkcode_module.py#L17')
 
         self.assertSpyCallCount(_run_git, 5)
 

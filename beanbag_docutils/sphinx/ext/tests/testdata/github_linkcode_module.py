@@ -1,4 +1,6 @@
 # NOTE: The line numbers in this file matters for tests.
+from collections import namedtuple
+
 
 class ClassA(object):
     pass
@@ -19,4 +21,7 @@ class ClassB(object):
 def my_func():
     pass
 
+
 my_var = ClassB
+
+MyNamedTuple = namedtuple('MyNamedTuple', ('a', 'b', 'c'))

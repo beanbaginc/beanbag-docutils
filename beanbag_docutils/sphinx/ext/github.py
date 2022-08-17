@@ -198,13 +198,17 @@ def _find_path_in_ast_nodes(nodes, path):
         # targets of the assignment is the path we're looking for.
         if isinstance(node, ast.Assign):
             target_names = {
-                _target.id
+                getattr(_target, 'id', None)
                 for _target in node.targets
             }
 
             if name in target_names:
-                # We found it. We're done, probably.
-                assert len(path) == 1
+                # We found it. We're done.
+                #
+                # Note that there might be more items in path, but if so,
+                # then we're documenting something like a namedtuple() that
+                # got code-injected. There isn't likely to be any code to
+                # link to beyond this.
                 return node
 
         # If this is anything else, see if it has the next name in the path.
