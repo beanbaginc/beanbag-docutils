@@ -425,6 +425,104 @@ class GitHubLinkCodeResolveTests(kgb.SpyAgency, SphinxExtTestCase):
 
         self.assertSpyCallCount(_run_git, 4)
 
+    def test_with_github_url(self):
+        """Testing github_linkcode_resolve with custom github_url="""
+        self.spy_on(_run_git, op=kgb.SpyOpMatchInOrder([
+            {
+                'args': (['fetch', 'origin', 'mybranch', 'origin'],),
+                'call_original': False,
+            },
+            {
+                'args': (['branch', '-rv', '--contains', 'mybranch'],),
+                'op': kgb.SpyOpReturn(
+                    b'  origin/mybranch abcd123 Here is a commit.\n'
+                ),
+            },
+            {
+                'args': (['log', '--pretty=format:%H', '...abcd123'],),
+                'op': kgb.SpyOpReturn(
+                    b'157ac365d792c79987966e0152d16d6d1526b24d\n'
+                ),
+            },
+            {
+                'args': (['rev-parse', 'mybranch'],),
+                'op': kgb.SpyOpReturn(
+                    b'55ca6286e3e4f4fba5d0448333fa99fc5a404a73\n'
+                ),
+            },
+        ]))
+
+        url = github_linkcode_resolve(
+            domain='py',
+            info={
+                'module': self.SRC_MODULE,
+                'fullname': 'ClassB',
+            },
+            github_org_id='beanbaginc',
+            github_repo_id='beanbag_docutils',
+            branch='mybranch',
+            github_url='https://dev.example.com/github')
+
+        self.assertIsNotNone(url)
+        self.assertIsInstance(url, six.text_type)
+        self.assertEqual(
+            url,
+            'https://dev.example.com/github/beanbaginc/beanbag_docutils/blob/'
+            '55ca6286e3e4f4fba5d0448333fa99fc5a404a73/beanbag_docutils/'
+            'sphinx/ext/tests/testdata/github_linkcode_module.py#L9')
+
+        self.assertSpyCallCount(_run_git, 4)
+
+    def test_with_github_url_trailing_slash(self):
+        """Testing github_linkcode_resolve with custom github_url= with
+        trailing slash
+        """
+        self.spy_on(_run_git, op=kgb.SpyOpMatchInOrder([
+            {
+                'args': (['fetch', 'origin', 'mybranch', 'origin'],),
+                'call_original': False,
+            },
+            {
+                'args': (['branch', '-rv', '--contains', 'mybranch'],),
+                'op': kgb.SpyOpReturn(
+                    b'  origin/mybranch abcd123 Here is a commit.\n'
+                ),
+            },
+            {
+                'args': (['log', '--pretty=format:%H', '...abcd123'],),
+                'op': kgb.SpyOpReturn(
+                    b'157ac365d792c79987966e0152d16d6d1526b24d\n'
+                ),
+            },
+            {
+                'args': (['rev-parse', 'mybranch'],),
+                'op': kgb.SpyOpReturn(
+                    b'55ca6286e3e4f4fba5d0448333fa99fc5a404a73\n'
+                ),
+            },
+        ]))
+
+        url = github_linkcode_resolve(
+            domain='py',
+            info={
+                'module': self.SRC_MODULE,
+                'fullname': 'ClassB',
+            },
+            github_org_id='beanbaginc',
+            github_repo_id='beanbag_docutils',
+            branch='mybranch',
+            github_url='https://dev.example.com/github/')
+
+        self.assertIsNotNone(url)
+        self.assertIsInstance(url, six.text_type)
+        self.assertEqual(
+            url,
+            'https://dev.example.com/github/beanbaginc/beanbag_docutils/blob/'
+            '55ca6286e3e4f4fba5d0448333fa99fc5a404a73/beanbag_docutils/'
+            'sphinx/ext/tests/testdata/github_linkcode_module.py#L9')
+
+        self.assertSpyCallCount(_run_git, 4)
+
     def test_with_multiple_refs(self):
         """Testing github_linkcode_resolve with multiple refs for branch"""
         self.spy_on(_run_git, op=kgb.SpyOpMatchInOrder([

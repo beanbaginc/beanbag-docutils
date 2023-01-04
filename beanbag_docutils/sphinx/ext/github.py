@@ -281,13 +281,18 @@ def _find_ast_node_for_path(module, path):
 
 
 def github_linkcode_resolve(domain, info, github_org_id, github_repo_id,
-                            branch, source_prefix='', allowed_module_names=[]):
+                            branch, source_prefix='', allowed_module_names=[],
+                            *, github_url='https://github.com'):
     """Return a link to the source on GitHub for the given autodoc info.
 
     This takes some basic information on the GitHub project, branch, and
     what modules are considered acceptable, and generates a link to the
     approprite line on the GitHub repository browser for the class, function,
     variable, or other object.
+
+    Version Changed:
+        2.1:
+        Added ``github_host`` and ``github_scheme`` arguments.
 
     Args:
         domain (unicode):
@@ -317,6 +322,17 @@ def github_linkcode_resolve(domain, info, github_org_id, github_repo_id,
             The list of top-level module names considered valid for links.
             If provided, links will only be generated if residing somewhere
             in one of the provided module names.
+
+        github_url (str, optional):
+            The URL to the base of the GitHub server.
+
+            Version Added:
+                2.1
+
+    Returns:
+        str:
+        The link to the source. This will be ``None`` if a URL couldn't be
+        calculated.
     """
     module_name = info['module']
 
@@ -354,9 +370,12 @@ def github_linkcode_resolve(domain, info, github_org_id, github_repo_id,
 
     assert isinstance(ref, six.text_type)
 
-    return ('https://github.com/%s/%s/blob/%s/%s%s%s'
-            % (github_org_id, github_repo_id, ref, source_prefix,
-               filename, linespec))
+    github_url = github_url.rstrip('/')
+
+    return (
+        f'{github_url}/{github_org_id}/{github_repo_id}/blob/'
+        f'{ref}/{source_prefix}{filename}{linespec}'
+    )
 
 
 def clear_github_linkcode_caches():
