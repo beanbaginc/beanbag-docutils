@@ -699,8 +699,7 @@ def _on_config_inited(app, config):
         }, **(config.autodoc_default_options or {}))
 
     # Register type aliases.
-    if config.napoleon_type_aliases is None:
-        config.napoleon_type_aliases = {}
+    new_type_aliases = {}
 
     if 'python' in config.intersphinx_mapping:
         python_intersphinx = config.intersphinx_mapping['python'][0]
@@ -711,17 +710,26 @@ def _on_config_inited(app, config):
                 #
                 # Note that 'list' does not have corresponding type
                 # documentation in Python 2.
-                config.napoleon_type_aliases.update({
+                new_type_aliases.update({
                     'tuple': ':py:func:`tuple <tuple>`',
                     'unicode': ':py:func:`unicode <unicode>`',
                 })
             else:
                 # Python 3
-                config.napoleon_type_aliases.update({
+                new_type_aliases.update({
                     'list': ':py:class:`list`',
                     'tuple': ':py:class:`tuple`',
                     'unicode': ':py:class:`unicode <str>`',
                 })
+
+    if new_type_aliases:
+        if config.napoleon_type_aliases is None:
+            config.napoleon_type_aliases = new_type_aliases.copy()
+        else:
+            config.napoleon_type_aliases.update(new_type_aliases)
+
+        if 'autodoc_type_aliases' in config:
+            config.autodoc_type_aliases.update(new_type_aliases)
 
     # Update autodoc_excludes to include defaults if requested.
     #
