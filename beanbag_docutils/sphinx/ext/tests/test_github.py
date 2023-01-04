@@ -482,6 +482,33 @@ class GitHubLinkCodeResolveTests(kgb.SpyAgency, SphinxExtTestCase):
 
         self.assertSpyCallCount(_run_git, 5)
 
+    def test_with_tracking_branch_not_found(self):
+        """Testing github_linkcode_resolve with tracking branch not found"""
+        self.spy_on(_run_git, op=kgb.SpyOpMatchInOrder([
+            {
+                'args': (['fetch', 'origin', 'mybranch', 'origin'],),
+                'call_original': False,
+            },
+            {
+                'args': (['branch', '-rv', '--contains', 'mybranch'],),
+                'op': kgb.SpyOpReturn(b''),
+            },
+        ]))
+
+        url = github_linkcode_resolve(
+            domain='py',
+            info={
+                'module': self.SRC_MODULE,
+                'fullname': 'ClassB.do_thing',
+            },
+            github_org_id='beanbaginc',
+            github_repo_id='beanbag_docutils',
+            branch='mybranch',
+            allowed_module_names=['beanbag_docutils'])
+
+        self.assertIsNone(url)
+        self.assertSpyCallCount(_run_git, 2)
+
     def test_with_non_py_domain(self):
         """Testing github_linkcode_resolve with non-"py" domain"""
         self.spy_on(_run_git, call_original=False)

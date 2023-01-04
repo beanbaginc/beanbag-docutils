@@ -75,6 +75,9 @@ def _run_git(cmd):
         subprocess.CalledProcessError:
             Error calling into git.
     """
+    assert cmd
+    assert all(cmd)
+
     p = subprocess.Popen(['git'] + cmd, stdout=subprocess.PIPE)
     output, error = p.communicate()
     ret_code = p.poll()
@@ -154,14 +157,18 @@ def _get_git_doc_ref(branch):
     global _head_ref
 
     if not _head_ref:
+        _head_ref = None
+
         try:
             tracking_branch = _git_get_nearest_tracking_branch(branch)
-            _head_ref = _run_git(['rev-parse', tracking_branch]).strip()
 
-            if isinstance(_head_ref, bytes):
-                _head_ref = _head_ref.decode('utf-8')
+            if tracking_branch:
+                _head_ref = (
+                    _run_git(['rev-parse', tracking_branch]).strip()
+                    .decode('utf-8')
+                )
         except subprocess.CalledProcessError:
-            _head_ref = None
+            pass
 
     return _head_ref
 
@@ -340,7 +347,11 @@ def github_linkcode_resolve(domain, info, github_org_id, github_repo_id,
     linespec = '#L%d' % node.lineno
 
     # Get the branch/tag/commit to link to.
-    ref = _get_git_doc_ref(branch) or branch
+    ref = _get_git_doc_ref(branch)
+
+    if not ref:
+        return None
+
     assert isinstance(ref, six.text_type)
 
     return ('https://github.com/%s/%s/blob/%s/%s%s%s'
