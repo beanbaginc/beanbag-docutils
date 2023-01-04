@@ -50,6 +50,7 @@ more information. You can configure this in :file:`conf.py` by doing::
     autodoc_excludes = {
         # Applies to modules, classes, and anything else.
         '*': [
+            '__annotations__',
             '__dict__',
             '__doc__',
             '__module__',
@@ -737,6 +738,7 @@ def _on_config_inited(app, config):
     if config.autodoc_excludes.get('__defaults__'):
         new_autodoc_excludes = {
             '*': {
+                '__annotations__',
                 '__dict__',
                 '__doc__',
                 '__module__',
