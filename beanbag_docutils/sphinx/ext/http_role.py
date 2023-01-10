@@ -46,8 +46,6 @@ Configuration
     ``%s``, which will be replaced by the numeric HTTP status code.
 """
 
-from __future__ import unicode_literals
-
 from docutils import nodes
 from docutils.parsers.rst import Directive
 

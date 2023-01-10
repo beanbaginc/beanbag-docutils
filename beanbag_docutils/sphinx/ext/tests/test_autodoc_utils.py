@@ -1,9 +1,5 @@
 """Unit tests for beanbag_docutils.sphinx.ext.autodoc_utils."""
 
-from __future__ import unicode_literals
-
-import six
-
 from beanbag_docutils.sphinx.ext import autodoc_utils
 from beanbag_docutils.sphinx.ext.autodoc_utils import BeanbagDocstring
 from beanbag_docutils.sphinx.ext.tests.testcase import SphinxExtTestCase
@@ -566,8 +562,7 @@ class BeanbagDocstringTests(SphinxExtTestCase):
             The resulting ReStructuredText.
         """
         with self.with_sphinx_env() as ctx:
-            return six.text_type(BeanbagDocstring(content,
-                                                  config=ctx['config']))
+            return str(BeanbagDocstring(content, config=ctx['config']))
 
 
 __autodoc_excludes__ = ['IgnoredModule']

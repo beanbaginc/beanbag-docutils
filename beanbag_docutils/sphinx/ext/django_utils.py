@@ -41,9 +41,6 @@ Roles
        And then to reference it: :setting:`MY_SETTING`.
 """
 
-from __future__ import unicode_literals
-
-import six
 from django.utils.functional import Promise
 
 
@@ -54,7 +51,7 @@ def _repr_promise(promise):
     a Unicode string before generating a representation.
     """
     if hasattr(promise, '_proxy____text_cast'):
-        return '_(%s)' % repr(six.text_type(promise))
+        return '_(%r)' % str(promise)
 
     return super(promise.__class__, promise).__repr__(promise)
 

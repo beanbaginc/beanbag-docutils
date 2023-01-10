@@ -144,12 +144,9 @@ Configuration
     .. versionadded:: 2.0
 """
 
-from __future__ import unicode_literals
-
 import re
 import sys
 
-import six
 from sphinx import version_info
 from sphinx.ext.napoleon.docstring import GoogleDocstring, _convert_type_spec
 
@@ -356,7 +353,7 @@ class BeanbagDocstring(GoogleDocstring):
                     # See if there's an ending part anywhere.
                     lines = self.peek_lines(i + 1)
 
-                    if not isinstance(lines[i], six.string_types):
+                    if not isinstance(lines[i], str):
                         # We're past the strings and into something else.
                         # Bail.
                         break
@@ -751,13 +748,13 @@ def _on_config_inited(app, config):
 
         new_autodoc_excludes.update({
             key: set(value)
-            for key, value in six.iteritems(config.autodoc_excludes)
+            for key, value in config.autodoc_excludes.items()
             if key not in ('*', '__defaults__')
         })
     else:
         new_autodoc_excludes = {
             key: set(value)
-            for key, value in six.iteritems(config.autodoc_excludes)
+            for key, value in config.autodoc_excludes.items()
             if key != '__defaults__'
         }
 

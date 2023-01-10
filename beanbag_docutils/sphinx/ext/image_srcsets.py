@@ -39,8 +39,6 @@ To use this, you just need to add the extension in :file:`conf.py`::
     ]
 """
 
-from __future__ import unicode_literals
-
 import os
 import posixpath
 import re
@@ -48,7 +46,6 @@ from collections import OrderedDict
 from glob import glob
 from typing import Dict
 
-import six
 from docutils import nodes
 from docutils.parsers.rst import directives
 from docutils.parsers.rst.directives.images import Image
@@ -127,7 +124,7 @@ def _visit_image_html(
                         posixpath.join(base_images_path,
                                        urllib_quote(images[url][1])),
                         source)
-                    for source, url in six.iteritems(srcsets)
+                    for source, url in srcsets.items()
                 ),
                 last_tag[len('<img '):],
             )
@@ -190,7 +187,7 @@ def collect_srcsets(
                         if descriptor not in srcsets:
                             srcsets[descriptor] = candidate
 
-        for descriptor, image_path in list(six.iteritems(srcsets)):
+        for descriptor, image_path in list(srcsets.items()):
             image_path = env.relfn2path(
                 search_image_for_language(image_path, env),
                 docname)[0]

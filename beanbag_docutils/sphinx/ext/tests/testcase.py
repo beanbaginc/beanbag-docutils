@@ -1,14 +1,11 @@
 """Base test case support for Sphinx extensions."""
 
-from __future__ import unicode_literals
-
 import os
 import shutil
 import tempfile
 from contextlib import contextmanager
 from unittest import TestCase
 
-import six
 from sphinx_testing.util import TestApp, docutils_namespace
 
 import beanbag_docutils
@@ -119,7 +116,7 @@ class SphinxExtTestCase(TestCase):
                 with open('contents.rst', 'w') as fp:
                     fp.write(doc_content)
 
-                for path, contents in six.iteritems(extra_files):
+                for path, contents in extra_files.items():
                     dirname = os.path.dirname(path)
 
                     if not os.path.exists(dirname):

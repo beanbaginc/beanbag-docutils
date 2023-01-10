@@ -1,7 +1,5 @@
 """Unit tests for beanbag_docutils.sphinx.ext.image_srcsets."""
 
-from __future__ import unicode_literals
-
 from beanbag_docutils.sphinx.ext import image_srcsets
 from beanbag_docutils.sphinx.ext.tests.testcase import SphinxExtTestCase
 

@@ -1,9 +1,6 @@
 """Unit tests for beanbag_docutils.sphinx.ext.github"""
 
-from __future__ import unicode_literals
-
 import kgb
-import six
 
 from beanbag_docutils.sphinx.ext.github import (clear_github_linkcode_caches,
                                                 github_linkcode_resolve,
@@ -60,7 +57,7 @@ class GitHubLinkCodeResolveTests(kgb.SpyAgency, SphinxExtTestCase):
             branch='mybranch')
 
         self.assertIsNotNone(url)
-        self.assertIsInstance(url, six.text_type)
+        self.assertIsInstance(url, str)
         self.assertEqual(
             url,
             'https://github.com/beanbaginc/beanbag_docutils/blob/'
@@ -107,7 +104,7 @@ class GitHubLinkCodeResolveTests(kgb.SpyAgency, SphinxExtTestCase):
             branch='mybranch')
 
         self.assertIsNotNone(url)
-        self.assertIsInstance(url, six.text_type)
+        self.assertIsInstance(url, str)
         self.assertEqual(
             url,
             'https://github.com/beanbaginc/beanbag_docutils/blob/'
@@ -154,7 +151,7 @@ class GitHubLinkCodeResolveTests(kgb.SpyAgency, SphinxExtTestCase):
             branch='mybranch')
 
         self.assertIsNotNone(url)
-        self.assertIsInstance(url, six.text_type)
+        self.assertIsInstance(url, str)
         self.assertEqual(
             url,
             'https://github.com/beanbaginc/beanbag_docutils/blob/'
@@ -201,7 +198,7 @@ class GitHubLinkCodeResolveTests(kgb.SpyAgency, SphinxExtTestCase):
             branch='mybranch')
 
         self.assertIsNotNone(url)
-        self.assertIsInstance(url, six.text_type)
+        self.assertIsInstance(url, str)
         self.assertEqual(
             url,
             'https://github.com/beanbaginc/beanbag_docutils/blob/'
@@ -248,7 +245,7 @@ class GitHubLinkCodeResolveTests(kgb.SpyAgency, SphinxExtTestCase):
             branch='mybranch')
 
         self.assertIsNotNone(url)
-        self.assertIsInstance(url, six.text_type)
+        self.assertIsInstance(url, str)
         self.assertEqual(
             url,
             'https://github.com/beanbaginc/beanbag_docutils/blob/'
@@ -297,7 +294,7 @@ class GitHubLinkCodeResolveTests(kgb.SpyAgency, SphinxExtTestCase):
             branch='mybranch')
 
         self.assertIsNotNone(url)
-        self.assertIsInstance(url, six.text_type)
+        self.assertIsInstance(url, str)
         self.assertEqual(
             url,
             'https://github.com/beanbaginc/beanbag_docutils/blob/'
@@ -347,7 +344,7 @@ class GitHubLinkCodeResolveTests(kgb.SpyAgency, SphinxExtTestCase):
             allowed_module_names=['beanbag_docutils'])
 
         self.assertIsNotNone(url)
-        self.assertIsInstance(url, six.text_type)
+        self.assertIsInstance(url, str)
         self.assertEqual(
             url,
             'https://github.com/beanbaginc/beanbag_docutils/blob/'
@@ -415,7 +412,7 @@ class GitHubLinkCodeResolveTests(kgb.SpyAgency, SphinxExtTestCase):
             source_prefix='foo/bar/')
 
         self.assertIsNotNone(url)
-        self.assertIsInstance(url, six.text_type)
+        self.assertIsInstance(url, str)
         self.assertEqual(
             url,
             'https://github.com/beanbaginc/beanbag_docutils/blob/'
@@ -464,7 +461,7 @@ class GitHubLinkCodeResolveTests(kgb.SpyAgency, SphinxExtTestCase):
             github_url='https://dev.example.com/github')
 
         self.assertIsNotNone(url)
-        self.assertIsInstance(url, six.text_type)
+        self.assertIsInstance(url, str)
         self.assertEqual(
             url,
             'https://dev.example.com/github/beanbaginc/beanbag_docutils/blob/'
@@ -514,7 +511,7 @@ class GitHubLinkCodeResolveTests(kgb.SpyAgency, SphinxExtTestCase):
             github_url='https://dev.example.com/github/')
 
         self.assertIsNotNone(url)
-        self.assertIsInstance(url, six.text_type)
+        self.assertIsInstance(url, str)
         self.assertEqual(
             url,
             'https://dev.example.com/github/beanbaginc/beanbag_docutils/blob/'
@@ -570,7 +567,7 @@ class GitHubLinkCodeResolveTests(kgb.SpyAgency, SphinxExtTestCase):
             source_prefix='foo/bar/')
 
         self.assertIsNotNone(url)
-        self.assertIsInstance(url, six.text_type)
+        self.assertIsInstance(url, str)
         self.assertEqual(
             url,
             'https://github.com/beanbaginc/beanbag_docutils/blob/'

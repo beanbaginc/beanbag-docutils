@@ -1,6 +1,3 @@
-from __future__ import unicode_literals
-
-
 #: The version of beanbag_docutils.
 #:
 #: This is in the format of:

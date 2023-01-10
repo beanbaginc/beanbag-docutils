@@ -30,11 +30,7 @@ Configuration
     the filename and before the extension. This defaults to ``['@2x', '@3x']``.
 """
 
-from __future__ import unicode_literals
-
 import os
-
-import six
 
 
 def add_high_dpi_images(app, env):
@@ -53,7 +49,7 @@ def add_high_dpi_images(app, env):
     suffixes = app.config['retina_suffixes']
     retina_images = []
 
-    for full_path, (docnames, filename) in six.iteritems(env.images):
+    for full_path, (docnames, filename) in env.images.items():
         base, ext = os.path.splitext(full_path)
 
         for suffix in suffixes:
@@ -96,7 +92,7 @@ def collect_pages(app):
     suffixes = app.config['retina_suffixes']
     new_images = {}
 
-    for full_path, basename in six.iteritems(app.builder.images):
+    for full_path, basename in app.builder.images.items():
         base, ext = os.path.splitext(full_path)
 
         for suffix in suffixes:

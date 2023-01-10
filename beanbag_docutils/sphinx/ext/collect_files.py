@@ -32,8 +32,6 @@ Configuration
     into the build directory.
 """
 
-from __future__ import unicode_literals
-
 import os
 import shutil
 from fnmatch import fnmatch

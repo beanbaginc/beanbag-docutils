@@ -33,17 +33,12 @@ To use this, you'll need to import the module and define your own
 docs for :py:func:`github_linkcode_resolve` for more information.
 """
 
-from __future__ import unicode_literals
-
 import ast
 import inspect
 import logging
 import re
 import subprocess
 import sys
-
-import six
-
 
 logger = logging.getLogger(__name__)
 
@@ -368,7 +363,7 @@ def github_linkcode_resolve(domain, info, github_org_id, github_repo_id,
     if not ref:
         return None
 
-    assert isinstance(ref, six.text_type)
+    assert isinstance(ref, str)
 
     github_url = github_url.rstrip('/')
 

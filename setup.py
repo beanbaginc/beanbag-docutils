@@ -23,9 +23,7 @@ setup(
     maintainer_email='christian@beanbaginc.com',
     packages=find_packages(),
     install_requires=[
-        'six',
         'Sphinx',
-        'typing; python_version < "3.5"',
     ],
     python_requires='>=3.6',
     classifiers=[

@@ -1,7 +1,5 @@
 """Unit tests for beanbag_docutils.sphinx.ext.http_role."""
 
-from __future__ import unicode_literals
-
 from beanbag_docutils.sphinx.ext.tests.testcase import SphinxExtTestCase
 
 

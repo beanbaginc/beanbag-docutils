@@ -16,8 +16,6 @@ To use this, add the extension in :file:`conf.py`::
     ]
 """
 
-from __future__ import unicode_literals
-
 import re
 
 from sphinx.domains.javascript import JSXRefRole

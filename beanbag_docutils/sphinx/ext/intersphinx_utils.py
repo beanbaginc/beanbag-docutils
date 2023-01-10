@@ -32,11 +32,8 @@ This extension must be added to ``exetnsions`` in :file:`conf.py` after the
     ]
 """
 
-from __future__ import unicode_literals
-
 import re
 
-import six
 from docutils.parsers.rst import Directive
 from sphinx.errors import ExtensionError
 from sphinx.ext import intersphinx
@@ -172,20 +169,10 @@ def setup(app):
     listeners = app.events.listeners.get('missing-reference', {})
     intersphinx_listener_id = None
 
-    if isinstance(listeners, list):
-        # Sphinx >= 3.x
-        for listener in listeners:
-            if listener.handler == intersphinx.missing_reference:
-                intersphinx_listener_id = listener.id
-                break
-    else:
-        assert isinstance(listeners, dict)
-
-        # Sphinx < 3.x
-        for listener_id, callback in six.iteritems(listeners):
-            if callback == intersphinx.missing_reference:
-                intersphinx_listener_id = listener_id
-                break
+    for listener in listeners:
+        if listener.handler == intersphinx.missing_reference:
+            intersphinx_listener_id = listener.id
+            break
 
     if intersphinx_listener_id is not None:
         app.events.disconnect(intersphinx_listener_id)

@@ -1,7 +1,5 @@
 """Unit tests for beanbag_docutils.sphinx.ext.django_utils."""
 
-from __future__ import unicode_literals
-
 from sphinx import version_info as sphinx_version_info
 
 from beanbag_docutils.sphinx.ext.tests.testcase import SphinxExtTestCase

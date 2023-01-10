@@ -23,9 +23,6 @@ for that extension, but add ours instead to :file:`conf.py`::
     ]
 """
 
-from __future__ import unicode_literals
-
-import six
 from sphinx import version_info as sphinx_version_info
 from sphinx.ext.extlinks import make_link_role
 
@@ -90,11 +87,11 @@ def setup_link_roles(app):
             The Sphinx application.
     """
     if sphinx_version_info[:2] >= (4, 0):
-        for name, (base_url, prefix) in six.iteritems(app.config.extlinks):
+        for name, (base_url, prefix) in app.config.extlinks.items():
             app.add_role(name, make_link_role(name, ExternalLink(base_url),
                                               prefix))
     else:
-        for name, (base_url, prefix) in six.iteritems(app.config.extlinks):
+        for name, (base_url, prefix) in app.config.extlinks.items():
             app.add_role(name, make_link_role(ExternalLink(base_url), prefix))
 
 
