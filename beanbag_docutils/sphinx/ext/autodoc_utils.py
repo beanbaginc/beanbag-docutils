@@ -148,9 +148,21 @@ import re
 import sys
 
 from sphinx import version_info
-from sphinx.ext.napoleon.docstring import GoogleDocstring, _convert_type_spec
+from sphinx.ext.napoleon.docstring import GoogleDocstring
 
 from beanbag_docutils import VERSION
+
+try:
+    from sphinx.ext.napoleon.docstring import _convert_type_spec
+except ImportError:
+    def _convert_type_spec(type_part, type_aliases):
+        try:
+            return type_aliases[type_part]
+        except KeyError:
+            if type_part == 'None':
+                return ':obj:`None`'
+            else:
+                return f':class:`{type_part}`'
 
 
 class BeanbagDocstring(GoogleDocstring):
@@ -544,7 +556,8 @@ class BeanbagDocstring(GoogleDocstring):
         if not type_str:
             return type_str
 
-        type_aliases = self._config.napoleon_type_aliases or {}
+        type_aliases = \
+            getattr(self._config, 'napoleon_type_aliases', None) or {}
         parts = type_str.split(',')
         type_parts = []
 
