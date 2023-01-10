@@ -8,6 +8,7 @@ import tempfile
 from contextlib import contextmanager
 from unittest import TestCase
 
+import six
 from sphinx_testing.util import TestApp, docutils_namespace
 
 import beanbag_docutils
@@ -34,7 +35,7 @@ class SphinxExtTestCase(TestCase):
     maxDiff = 1000000
 
     @contextmanager
-    def with_sphinx_env(self, config={}):
+    def with_sphinx_env(self, config={}, builder_name='html'):
         """Run within a Sphinx environment.
 
         Version Added:
@@ -67,7 +68,7 @@ class SphinxExtTestCase(TestCase):
         new_config.update(config)
 
         with docutils_namespace():
-            app = TestApp(buildername='html',
+            app = TestApp(buildername=builder_name,
                           create_new_srcdir=True,
                           copy_srcdir_to_tmpdir=False,
                           confoverrides=new_config)
@@ -81,7 +82,8 @@ class SphinxExtTestCase(TestCase):
             finally:
                 app.cleanup()
 
-    def render_doc(self, doc_content, config={}):
+    def render_doc(self, doc_content, config={}, builder_name='html',
+                   extra_files={}):
         """Render a ReST document to a string.
 
         This will set up a Sphinx environment, based on the extensions and
@@ -100,12 +102,36 @@ class SphinxExtTestCase(TestCase):
             unicode:
             The rendered content.
         """
-        with self.with_sphinx_env(config=config) as ctx:
-            with open(os.path.join(ctx['srcdir'], 'contents.rst'), 'w') as fp:
-                fp.write(doc_content)
+        if builder_name == 'html':
+            out_filename = 'contents.html'
+        else:
+            raise ValueError('"%s" is not a supported builder name'
+                             % builder_name)
 
-            app = ctx['app']
-            app.build()
+        with self.with_sphinx_env(config=config,
+                                  builder_name=builder_name) as ctx:
+            srcdir = ctx['srcdir']
 
-            with open(app.outdir / 'contents.html', 'r') as fp:
-                return fp.read().strip()
+            old_cwd = os.getcwd()
+            os.chdir(srcdir)
+
+            try:
+                with open('contents.rst', 'w') as fp:
+                    fp.write(doc_content)
+
+                for path, contents in six.iteritems(extra_files):
+                    dirname = os.path.dirname(path)
+
+                    if not os.path.exists(dirname):
+                        os.makedirs(dirname)
+
+                    with open(path, 'wb') as fp:
+                        fp.write(contents)
+
+                app = ctx['app']
+                app.build()
+
+                with open(app.outdir / out_filename, 'r') as fp:
+                    return fp.read().strip()
+            finally:
+                os.chdir(old_cwd)

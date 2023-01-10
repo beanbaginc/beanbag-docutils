@@ -1,5 +1,10 @@
 """Sphinx extension for Retina images.
 
+.. deprecated:: 2.1
+
+   We recommend using :py:mod:`beanbag_docutils.sphinx.ext.image_srcsets`
+   instead. This extension will be removed in a future release.
+
 This extension goes through all the images Sphinx will provide in _images and
 checks if Retina versions are available. If there are any, they will be copied
 as well.

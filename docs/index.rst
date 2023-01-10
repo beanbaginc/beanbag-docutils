@@ -12,7 +12,7 @@ Amongst other enhancements, this package offers:
 
 * A parser for the `Beanbag docstring format`_ (a variation on the `Google
   docstring format`_), which we use for Python and JavaScript documentation
-* Enhancements for Sphinx’s intersphinx_ system to provide per-page
+* Enhancements for Sphinx's intersphinx_ system to provide per-page
   intersphinx resolution options (useful for pages, such as release notes,
   that need to link to different versions of the same docs, such as Django_ or
   Python)
@@ -87,6 +87,11 @@ The following extensions are provided:
 :py:mod:`~beanbag_docutils.sphinx.ext.http_role`
     * Provides a :rst:role:`http` role for specifying HTTP status codes and
       linking them to useful documentation.
+
+:py:mod:`~beanbag_docutils.sphinx.ext.image_srcsets`
+    * Drop-in support for generating ``<img srcset="...">`` images using the
+      built-in :rst:directive:`image` directive. Appropriate images can be
+      automatically determined or manually specified.
 
 :py:mod:`~beanbag_docutils.sphinx.ext.intersphinx_utils`
     * Allows individual documentation pages to specify which intersphinx_

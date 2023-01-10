@@ -25,6 +25,7 @@ setup(
     install_requires=[
         'six',
         'Sphinx',
+        'typing; python_version < "3.5"',
     ],
     python_requires='>=3.6',
     classifiers=[
