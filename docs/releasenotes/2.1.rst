@@ -1,0 +1,69 @@
+====================
+beanbag-docutils 2.1
+====================
+
+**Release date:** TBD
+
+
+Packaging / Compatibility
+=========================
+
+* Added support for Sphinx 6.
+
+* Updated the Sphinx dependency to require version 4 or higher.
+
+* Removed a dependency on ``six``.
+
+
+beanbag_docutils.sphinx.ext.autodoc_utils
+=========================================
+
+* Fixed performing incremental builds.
+
+  Due to a bug, all builds were being treated as full builds.
+
+* ``__annotations__`` are now excluded from generated docs by default.
+
+
+beanbag_docutils.sphinx.ext.github
+==================================
+
+* Added support for custom GitHub URLs.
+
+  A GitHub URL (useful for GitHub Enterprise) can now be set by passing
+  ``github_url=`` to
+  :py:func:`~beanbag_docutils.sphinx.ext.github.github_linkcode_resolve`.
+
+* Fixed generating links to GitHub when failing to resolve tracking branches.
+
+  These links were appearing broken before. Now, if a tracking branch can't
+  be resolved, the links will point to the file on GitHub without a stable
+  SHA.
+
+
+beanbag_docutils.sphinx.ext.image_srcsets
+=========================================
+
+* Added the new :py:mod:`~beanbag_docutils.sphinx.ext.image_srcsets` Sphinx
+  extension.
+
+  This extension enables multi-DPI/responsive images to be used in generated
+  documentation.
+
+  It's intended to replace :rst:dir:`image` and can be used like:
+
+  .. code-block:: restructuredtext
+
+     .. image:: path/to/file.png
+        :sources: 2x path/to/file@2x.png
+                  3x path/to/file@3x.png
+                  100w path/to/file@100w.svg
+                  200h path/to/file@200h.svg
+
+
+Contributors
+============
+
+* Christian Hammond
+* David Trowbridge
+* Michelle Aubin
