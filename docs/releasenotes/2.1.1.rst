@@ -1,0 +1,19 @@
+======================
+beanbag-docutils 2.1.1
+======================
+
+**Release date:** February 28, 2023
+
+
+beanbag_docutils.sphinx.ext.image_srcsets
+=========================================
+
+* Fixed automatically scanning and collecting multi-DPI images for the
+  generated documentation.
+
+
+Contributors
+============
+
+* Christian Hammond
+* David Trowbridge

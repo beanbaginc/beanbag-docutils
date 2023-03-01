@@ -1,6 +1,3 @@
-
-
-
 beanbag-docutils
 ================
 
@@ -90,7 +87,7 @@ The following extensions are provided:
 
 :py:mod:`~beanbag_docutils.sphinx.ext.image_srcsets`
     * Drop-in support for generating ``<img srcset="...">`` images using the
-      built-in :rst:directive:`image` directive. Appropriate images can be
+      built-in :rst:dir:`image` directive. Appropriate images can be
       automatically determined or manually specified.
 
 :py:mod:`~beanbag_docutils.sphinx.ext.intersphinx_utils`
