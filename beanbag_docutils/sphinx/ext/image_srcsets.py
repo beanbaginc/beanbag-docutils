@@ -44,7 +44,7 @@ import posixpath
 import re
 from collections import OrderedDict
 from glob import glob
-from typing import Dict
+from typing import Dict, List, Optional, TYPE_CHECKING
 
 from docutils import nodes
 from docutils.parsers.rst import directives
@@ -53,9 +53,16 @@ from six.moves.urllib.parse import quote as urllib_quote
 from sphinx.application import Sphinx
 from sphinx.util.i18n import search_image_for_language
 
+from beanbag_docutils import VERSION
+
+if TYPE_CHECKING:
+    from sphinx.environment import BuildEnvironment
+
 
 def _get_srcsets(
-    node  # type: nodes.image
+    env,          # type: BuildEnvironment
+    node,         # type: nodes.image
+    docname=None  # type: Optional[str]
 ):  # type: (...) -> Dict[str, str]
     """Return a normalized version of all srcsets for an image node.
 
@@ -65,8 +72,16 @@ def _get_srcsets(
     These will be cached for future lookup.
 
     Args:
+        env (sphinx.environment.BuildEnvironment):
+            The current Sphinx build environment.
+
         node (docutils.nodes.image):
             The image node to retrieve sources from.
+
+        docname (str, optional):
+            The current document name.
+
+            This is required when srcsets are not already cached.
 
     Returns:
         dict:
@@ -75,6 +90,8 @@ def _get_srcsets(
     try:
         norm_srcsets = node.attributes['_srcsets']
     except KeyError:
+        assert docname
+
         srcset = node.attributes.get('sources')
         norm_srcsets = OrderedDict()
 
@@ -86,7 +103,9 @@ def _get_srcsets(
 
                 if source:
                     descriptor, url = source.split(' ', 1)
-                    norm_srcsets[descriptor.strip()] = url.strip()
+                    norm_srcsets[descriptor.strip()] = env.relfn2path(
+                        search_image_for_language(url.strip(), env),
+                        docname)[0]
 
         node.attributes['_srcsets'] = norm_srcsets
 
@@ -109,9 +128,13 @@ def _visit_image_html(
     # Use the default logic to build the image tag, since it's non-trivial.
     type(self).visit_image(self, node)
 
-    images = self.builder.env.images
-    base_images_path = self.builder.imgpath
-    srcsets = _get_srcsets(node)
+    builder = self.builder
+    env = builder.env
+    images = env.images
+    base_images_path = builder.imgpath
+
+    srcsets = _get_srcsets(node=node,
+                           env=env)
 
     if srcsets:
         last_tag = self.body[-1]
@@ -161,18 +184,19 @@ def collect_srcsets(
         findall = doctree.traverse
 
     for node in findall(nodes.image):
-        srcsets = _get_srcsets(node)
+        srcsets = _get_srcsets(node=node,
+                               env=env,
+                               docname=docname)
 
         if not srcsets:
-            image_path = search_image_for_language(node['uri'], env)
-            rel_image_path, abs_image_path = env.relfn2path(
-                search_image_for_language(node['uri'], env),
-                docname)
+            # NOTE: This will modify the contents of the cached srcsets.
+            uri = node['uri']
+            image_path = search_image_for_language(uri, env)
             base_filename, ext = os.path.splitext(image_path)
             candidates = glob('%s@*%s' % (base_filename, ext))
 
             if candidates:
-                srcsets['1x'] = node['uri']
+                srcsets['1x'] = uri
 
                 pattern = re.compile(r'%s@(\d+[xwh])%s'
                                      % (re.escape(base_filename),
@@ -187,18 +211,39 @@ def collect_srcsets(
                         if descriptor not in srcsets:
                             srcsets[descriptor] = candidate
 
-        for descriptor, image_path in list(srcsets.items()):
-            image_path = env.relfn2path(
-                search_image_for_language(image_path, env),
-                docname)[0]
-
+        for descriptor, image_path in srcsets.items():
             env.dependencies[docname].add(image_path)
             images.add_file(docname, image_path)
 
 
+def collect_pages(
+    app  # type: Sphinx
+):  # type: (...) -> List
+    """Collect srcset-specified images for use in HTML pages.
+
+    This will go through the images referenced in a document for an HTML page
+    and add any images found in srcsets to the list of images to collect for
+    the page.
+
+    Args:
+        app (sphinx.application.Sphinx):
+            The Sphinx application to register roles and configuration on.
+
+    Returns:
+        list:
+        An empty list (indicating no additional HTML pages are collected).
+    """
+    app.builder.images.update({
+        full_path: filename
+        for full_path, (docnames, filename) in app.env.images.items()
+    })
+
+    return []
+
+
 def setup(
     app  # type: Sphinx
-):  # type: (...) -> None
+):  # type: (...) -> Dict
     """Set up the Sphinx extension.
 
     This listens for the events needed to collect and bundle images for
@@ -215,3 +260,8 @@ def setup(
                  override=True)
 
     app.connect('doctree-read', collect_srcsets)
+    app.connect('html-collect-pages', collect_pages)
+
+    return {
+        'version': VERSION,
+    }
