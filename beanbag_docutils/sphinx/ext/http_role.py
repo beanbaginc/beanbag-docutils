@@ -233,7 +233,7 @@ def setup(app):
     """Set up the Sphinx extension.
 
     This registers the :rst:role:`http` role,
-    :rst:directive:`http-status-codes-format` directive, and the configuration
+    :rst:dir:`http-status-codes-format` directive, and the configuration
     settings for specifying the format and URL for linking to HTTP status
     codes.
 
