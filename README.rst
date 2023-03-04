@@ -17,6 +17,40 @@ Beanbag-related products, including:
 .. _RBTools: https://github.com/reviewboard/rbtools/
 
 
+Sphinx Extensions
+=================
+
+Most of the utilities are used with the Sphinx_ documentation system. Amongst
+other enhancements, this package offers:
+
+* A parser for the `Beanbag docstring format`_ (a variation on the `Google
+  docstring format`_), which we use for Python and JavaScript documentation
+* Enhancements for Sphinx's intersphinx_ system to provide per-page
+  intersphinx resolution options (useful for pages, such as release notes,
+  that need to link to different versions of the same docs, such as Django_ or
+  Python)
+* Enhancements to ReStructuredText references to let a reference name span
+  lines (useful for long Python/JavaScript module/class names)
+* Linking code references to GitHub documentation
+* High-DPI image embedding
+* A role for HTTP status codes
+* Access to document-defined metadata in a structured form when parsing
+  documents
+
+
+.. _Beanbag docstring format:
+   https://www.notion.so/reviewboard/Standard-Documentation-Format-4388f594d86547cc949b365cda3cf391
+.. _Django: https://www.djangoproject.com/
+.. _Google docstring format:
+   https://google.github.io/styleguide/pyguide.html#s3.8-comments-and-docstrings
+.. _intersphinx:
+   https://www.sphinx-doc.org/en/master/usage/extensions/intersphinx.html
+.. _our products: https://www.beanbaginc.com/
+.. _ReStructuredText:
+   https://docutils.sourceforge.io/docs/ref/rst/restructuredtext.html
+.. _Sphinx: https://www.sphinx-doc.org/
+
+
 Compatibility
 =============
 
