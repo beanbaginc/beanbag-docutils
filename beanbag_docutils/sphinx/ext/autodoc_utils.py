@@ -162,7 +162,7 @@ except ImportError:
             if type_part == 'None':
                 return ':obj:`None`'
             else:
-                return f':class:`{type_part}`'
+                return ':class:`%s`' % type_part
 
 
 class BeanbagDocstring(GoogleDocstring):
