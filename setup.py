@@ -23,7 +23,7 @@ setup(
     maintainer_email='christian@beanbaginc.com',
     packages=find_packages(),
     install_requires=[
-        'Sphinx',
+        'Sphinx>=1.8,<=7.999',
     ],
     python_requires='>=3.6',
     classifiers=[
@@ -40,6 +40,7 @@ setup(
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12',
         'Topic :: Documentation',
         'Topic :: Documentation :: Sphinx',
         'Topic :: Software Development',

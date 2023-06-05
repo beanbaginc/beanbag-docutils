@@ -54,7 +54,7 @@ other enhancements, this package offers:
 Compatibility
 =============
 
-* beanbag-docutils 2.x supports Python 3.6-3.11.
+* beanbag-docutils 2.x supports Python 3.6-3.12 and Sphinx 1.8-7.x.
 * beanbag-docutils 1.x supports Python 2.7 and 3.6-3.10.
 
 
