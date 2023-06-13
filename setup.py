@@ -24,6 +24,7 @@ setup(
     packages=find_packages(),
     install_requires=[
         'Sphinx>=1.8,<=7.999',
+        'sphinxcontrib-serializinghtml',
     ],
     python_requires='>=3.6',
     classifiers=[

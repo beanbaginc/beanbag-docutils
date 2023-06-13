@@ -109,6 +109,10 @@ intersphinx_mapping = {
     'pyhton': ('https://docs.python.org/', None),
 }
 
+extlinks = {
+    'pypi': ('https://pypi.org/project/%s/', '%s'),
+}
+
 
 autosummary_generate = True
 napolean_beanbag_docstring = True

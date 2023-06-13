@@ -98,6 +98,12 @@ The following extensions are provided:
       reference. Useful for having, say, different release notes pages linking
       to different versions of Python or Django_ documentation.
 
+:py:mod:`~beanbag_docutils.sphinx.ext.json_writer`
+    * An enhanced JSON writer that contains structured data for the docs-wide
+      Table of Contents, and HTML for in-page anchors for docs.
+
+    .. versionadded:: 2.2
+
 :py:mod:`~beanbag_docutils.sphinx.ext.metadata`
     * Extracts metadata from :rst:dir:`meta` directives into the document's
       metadata, allowing tools or custom doc rendering platforms to access it.
