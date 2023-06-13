@@ -101,6 +101,8 @@ class SphinxExtTestCase(TestCase):
         """
         if builder_name == 'html':
             out_filename = 'contents.html'
+        elif builder_name == 'json':
+            out_filename = 'contents.fjson'
         else:
             raise ValueError('"%s" is not a supported builder name'
                              % builder_name)

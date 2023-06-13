@@ -18,6 +18,8 @@ Amongst other enhancements, this package offers:
 * Linking code references to GitHub documentation
 * High-DPI image embedding
 * A role for HTTP status codes
+* Access to document-defined metadata in a structured form when parsing
+  documents
 
 
 .. _Beanbag docstring format:
@@ -95,6 +97,12 @@ The following extensions are provided:
       mappings should be used if multiple mappings contained the same
       reference. Useful for having, say, different release notes pages linking
       to different versions of Python or Django_ documentation.
+
+:py:mod:`~beanbag_docutils.sphinx.ext.metadata`
+    * Extracts metadata from :rst:dir:`meta` directives into the document's
+      metadata, allowing tools or custom doc rendering platforms to access it.
+
+    .. versionadded:: 2.2
 
 :py:mod:`~beanbag_docutils.sphinx.ext.ref_utils`
     * Allows Python and JavaScript references to span multiple lines, in
