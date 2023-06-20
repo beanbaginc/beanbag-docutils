@@ -1,0 +1,61 @@
+====================
+beanbag-docutils 2.2
+====================
+
+**Release date:** TBD
+
+
+Packaging / Compatibility
+=========================
+
+* Added support for Python 3.12.
+
+* Added support for Sphinx 6 and 7.
+
+
+New Extensions
+==============
+
+* Added a new :py:mod:`~beanbag_docutils.sphinx.ext.metadata` Sphinx
+  extension for extracting additional page metadata.
+
+  This extension extracts any :rst:dir:`meta` information (useful for content
+  like page descriptions for social media) and extracts their information into
+  the document's top-level metadata.
+
+  This metadata can then be used when building sites or tools that process the
+  page's compiled documentation (when not simply relying on the generated
+  HTML).
+
+  The metadata will be available in the document's ``meta`` information, keyed
+  off by the name used in the :rst:dir:`meta` directive, the content, and any
+  other attributes provided.
+
+  If multiple pieces of metadata exist for the same key, the information will
+  be assembled into a list under that key. Otherwise, the information will be
+  assigned directly to the key.
+
+* Added a new :py:mod:`~beanbag_docutils.sphinx.ext.json_writer` Sphinx
+  extension for enhanced JSON writing.
+
+  This augments the JSON writer typically found in the
+  :pypi:`sphinxcontrib-serializinghtml` package to include two new pieces
+  of information:
+
+  1. A structured representation of the Table of Contents for the whole doc
+     bundle.
+
+  2. Rendered HTML for the anchors in the page (similar to the "toc" available
+     in the page, but without the page's own header).
+
+  These can be used by consumers to pull out this structured information
+  without having to parse the docsets themselves, helping provide a dynamic
+  Table of Contents.
+
+
+Contributors
+============
+
+* Christian Hammond
+* David Trowbridge
+* Michelle Aubin
