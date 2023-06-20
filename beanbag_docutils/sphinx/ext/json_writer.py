@@ -133,7 +133,6 @@ class JSONBuilder(JSONHTMLBuilder):
         toc = []  # type: List[Dict[str, Any]]
 
         for docname in docnames:
-            print(docname, env.titles)
             toc_info = {
                 'docname': docname,
                 'title': str(env.titles[docname].children[0]),
