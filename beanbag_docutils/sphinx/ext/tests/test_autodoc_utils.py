@@ -1,5 +1,7 @@
 """Unit tests for beanbag_docutils.sphinx.ext.autodoc_utils."""
 
+from sphinx import version_info as sphinx_version_info
+
 from beanbag_docutils.sphinx.ext import autodoc_utils
 from beanbag_docutils.sphinx.ext.autodoc_utils import BeanbagDocstring
 from beanbag_docutils.sphinx.ext.tests.testcase import SphinxExtTestCase
@@ -238,24 +240,37 @@ class BeanbagDocstringTests(SphinxExtTestCase):
 
     def test_args_section(self):
         """Testing Beanbag docstring with Args section"""
-        self.assertEqual(
-            self._render_docstring(
-                'Args:\n'
-                '   arg1 (str):\n'
-                '       Description of arg1.\n'
-                '\n'
-                '   arg2 (foo.bar.abc\n'
-                '         .def.ghi,\n'
-                '         optional):\n'
-                '       Description of arg2.\n'
-                '\n'
-                '   *args (tuple):\n'
-                '       Description of args.\n'
-                '\n'
-                '   **kwargs (dict):\n'
-                '       Description of kwargs.\n'
-            ),
-            (
+        rendered = self._render_docstring(
+            'Args:\n'
+            '   arg1 (str):\n'
+            '       Description of arg1.\n'
+            '\n'
+            '   arg2 (foo.bar.abc\n'
+            '         .def.ghi,\n'
+            '         optional):\n'
+            '       Description of arg2.\n'
+            '\n'
+            '   *args (tuple):\n'
+            '       Description of args.\n'
+            '\n'
+            '   **kwargs (dict):\n'
+            '       Description of kwargs.\n'
+        )
+
+        if sphinx_version_info[:2] >= (7, 2):
+            self.assertEqual(
+                rendered,
+                ':param arg1: Description of arg1.\n'
+                ':type arg1: :py:class:`str`\n'
+                ':param arg2: Description of arg2.\n'
+                ':type arg2: :py:class:`foo.bar.abc.def.ghi`, *optional*\n'
+                ':param \\*args: Description of args.\n'
+                ':type \\*args: :py:class:`tuple`\n'
+                ':param \\*\\*kwargs: Description of kwargs.\n'
+                ':type \\*\\*kwargs: :py:class:`dict`\n')
+        else:
+            self.assertEqual(
+                rendered,
                 ':param arg1: Description of arg1.\n'
                 ':type arg1: :class:`str`\n'
                 ':param arg2: Description of arg2.\n'
@@ -263,9 +278,7 @@ class BeanbagDocstringTests(SphinxExtTestCase):
                 ':param \\*args: Description of args.\n'
                 ':type \\*args: :class:`tuple`\n'
                 ':param \\*\\*kwargs: Description of kwargs.\n'
-                ':type \\*\\*kwargs: :class:`dict`\n'
-            )
-        )
+                ':type \\*\\*kwargs: :class:`dict`\n')
 
     def test_context_section_with_description(self):
         """Testing Beanbag docstring with Context section with description"""
@@ -291,14 +304,20 @@ class BeanbagDocstringTests(SphinxExtTestCase):
         """Testing Beanbag docstring with Context section with type and
         description
         """
-        self.assertEqual(
-            self._render_docstring(
-                'Context:\n'
-                '    dict:\n'
-                '    Description of the context.\n'
-            ),
-            ':Context: :class:`dict` -- Description of the context.\n'
+        rendered = self._render_docstring(
+            'Context:\n'
+            '    dict:\n'
+            '    Description of the context.\n'
         )
+
+        if sphinx_version_info[:2] >= (7, 2):
+            self.assertEqual(
+                rendered,
+                ':Context: :py:class:`dict` -- Description of the context.\n')
+        else:
+            self.assertEqual(
+                rendered,
+                ':Context: :class:`dict` -- Description of the context.\n')
 
     def test_deprecated_section_with_version(self):
         """Testing Beanbag docstring with Deprecated section with version"""
@@ -354,106 +373,144 @@ class BeanbagDocstringTests(SphinxExtTestCase):
 
     def test_keys(self):
         """Testing Beanbag docstring with Keys section"""
-        self.assertEqual(
-            self._render_docstring(
-                'Keys:\n'
-                '    key1 (str):\n'
-                '        Description 1\n'
-                '\n'
-                '    key2 (dict):\n'
-                '        Description 2\n'
-                '\n'
-                '    key3 (int, optional):\n'
-                '        Description 3\n'
-            ),
-            (
+        rendered = self._render_docstring(
+            'Keys:\n'
+            '    key1 (str):\n'
+            '        Description 1\n'
+            '\n'
+            '    key2 (dict):\n'
+            '        Description 2\n'
+            '\n'
+            '    key3 (int, optional):\n'
+            '        Description 3\n'
+        )
+
+        if sphinx_version_info[:2] >= (7, 2):
+            self.assertEqual(
+                rendered,
+                ':Keys: * **key1** (:py:class:`str`) -- Description 1\n'
+                '       * **key2** (:py:class:`dict`) -- Description 2\n'
+                '       * **key3** (:py:class:`int`, *optional*)'
+                ' -- Description 3\n')
+        else:
+            self.assertEqual(
+                rendered,
                 ':Keys: * **key1** (:class:`str`) -- Description 1\n'
                 '       * **key2** (:class:`dict`) -- Description 2\n'
                 '       * **key3** (:class:`int`, *optional*)'
-                ' -- Description 3\n'
-            ))
+                ' -- Description 3\n')
 
     def test_model_attributes(self):
         """Testing Beanbag docstring with Model Attributes section"""
-        self.assertEqual(
-            self._render_docstring(
-                'Model Attributes:\n'
-                '    attr1 (dict):\n'
-                '        Description of attr1\n'
-                '\n'
-                '    attr2 (foo.bar\n'
-                '           .baz):\n'
-                '        Description of attr2\n'
-            ),
-            (
+        rendered = self._render_docstring(
+            'Model Attributes:\n'
+            '    attr1 (dict):\n'
+            '        Description of attr1\n'
+            '\n'
+            '    attr2 (foo.bar\n'
+            '           .baz):\n'
+            '        Description of attr2\n'
+        )
+
+        if sphinx_version_info[:2] >= (7, 2):
+            self.assertEqual(
+                rendered,
+                ':Model Attributes: * **attr1** (:py:class:`dict`)'
+                ' -- Description of attr1\n'
+                '                   * **attr2** (:py:class:`foo.bar.baz`)'
+                ' -- Description of attr2\n')
+        else:
+            self.assertEqual(
+                rendered,
                 ':Model Attributes: * **attr1** (:class:`dict`)'
                 ' -- Description of attr1\n'
                 '                   * **attr2** (:class:`foo.bar.baz`)'
-                ' -- Description of attr2\n'
-            )
-        )
+                ' -- Description of attr2\n')
+
 
     def test_option_args(self):
         """Testing Beanbag docstring with Option Args section"""
-        self.assertEqual(
-            self._render_docstring(
-                'Option Args:\n'
-                '    attr1 (dict):\n'
-                '        Description of attr1\n'
-                '\n'
-                '    attr2 (foo.bar\n'
-                '           .baz,\n'
-                '           optional):\n'
-                '        Description of attr2\n'
-            ),
-            (
+        rendered = self._render_docstring(
+            'Option Args:\n'
+            '    attr1 (dict):\n'
+            '        Description of attr1\n'
+            '\n'
+            '    attr2 (foo.bar\n'
+            '           .baz,\n'
+            '           optional):\n'
+            '        Description of attr2\n'
+        )
+
+        if sphinx_version_info[:2] >= (7, 2):
+            self.assertEqual(
+                rendered,
+                ':Option Args: * **attr1** (:py:class:`dict`)'
+                ' -- Description of attr1\n'
+                '              * **attr2** (:py:class:`foo.bar.baz`,'
+                ' *optional*) -- Description of attr2\n')
+        else:
+            self.assertEqual(
+                rendered,
                 ':Option Args: * **attr1** (:class:`dict`)'
                 ' -- Description of attr1\n'
                 '              * **attr2** (:class:`foo.bar.baz`, *optional*)'
-                ' -- Description of attr2\n'
-            )
-        )
+                ' -- Description of attr2\n')
 
     def test_tuple(self):
         """Testing Beanbag docstring with Tuple section"""
-        self.assertEqual(
-            self._render_docstring(
-                'Tuple:\n'
-                '    0 (str):\n'
-                '        Description 1\n'
-                '\n'
-                '    1 (dict):\n'
-                '        Description 2\n'
-                '\n'
-                '    2 (int, optional):\n'
-                '        Description 3\n'
-            ),
-            (
+        rendered = self._render_docstring(
+            'Tuple:\n'
+            '    0 (str):\n'
+            '        Description 1\n'
+            '\n'
+            '    1 (dict):\n'
+            '        Description 2\n'
+            '\n'
+            '    2 (int, optional):\n'
+            '        Description 3\n'
+        )
+
+        if sphinx_version_info[:2] >= (7, 2):
+            self.assertEqual(
+                rendered,
+                ':Tuple: * **0** (:py:class:`str`) -- Description 1\n'
+                '        * **1** (:py:class:`dict`) -- Description 2\n'
+                '        * **2** (:py:class:`int`, *optional*) -- '
+                'Description 3\n')
+        else:
+            self.assertEqual(
+                rendered,
                 ':Tuple: * **0** (:class:`str`) -- Description 1\n'
                 '        * **1** (:class:`dict`) -- Description 2\n'
-                '        * **2** (:class:`int`, *optional*) -- Description 3\n'
-            ))
+                '        * **2** (:class:`int`, *optional*) -- '
+                'Description 3\n')
 
     def test_type_section(self):
         """Testing Beanbag docstring with Type section"""
-        self.assertEqual(
-            self._render_docstring(
-                'Type:\n'
-                '    dict\n'
-            ),
-            ':Type: :class:`dict`\n'
+        rendered = self._render_docstring(
+            'Type:\n'
+            '    dict\n'
         )
+
+        if sphinx_version_info[:2] >= (7, 2):
+            self.assertEqual(rendered, ':Type: :py:class:`dict`\n')
+        else:
+            self.assertEqual(rendered, ':Type: :class:`dict`\n')
 
     def test_type_section_with_description(self):
         """Testing Beanbag docstring with Type section with description"""
-        self.assertEqual(
-            self._render_docstring(
-                'Type:\n'
-                '    dict:\n'
-                '    Description.\n'
-            ),
-            ':Type: :class:`dict` -- Description.\n'
+        rendered = self._render_docstring(
+            'Type:\n'
+            '    dict:\n'
+            '    Description.\n'
         )
+
+        if sphinx_version_info[:2] >= (7, 2):
+            self.assertEqual(rendered,
+                             ':Type: :py:class:`dict` -- Description.\n')
+        else:
+            self.assertEqual(rendered,
+                             ':Type: :class:`dict` -- Description.\n')
 
     def test_version_added_section_with_version(self):
         """Testing Beanbag docstring with Version Added section with version"""
