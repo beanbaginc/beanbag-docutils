@@ -1,0 +1,35 @@
+====================
+beanbag-docutils 2.3
+====================
+
+**Release date:** TBD
+
+
+Packaging / Compatibility
+=========================
+
+* Added support for Sphinx 7.2.
+
+
+beanbag_docutils.sphinx.ext.image_srcsets
+=========================================
+
+* Images with widths/heights now have ``width`` and ``height`` attributes
+  set.
+
+  Sphinx turns widths and heights into ``style="width: ...; height: ..."``
+  attributes, but does not set the dedicated ``width`` and ``height``
+  attributes. These attributes are helpful for the browser when computing
+  layout and aspect ratios, and are not deprecated or strictly interchangeable
+  with the CSS styles.
+
+  This extension now sets these attributes and strips them out of any CSS
+  styling.
+
+
+Contributors
+============
+
+* Christian Hammond
+* David Trowbridge
+* Michelle Aubin
