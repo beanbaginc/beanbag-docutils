@@ -51,3 +51,22 @@ class ImageTests(SphinxExtTestCase):
             '<img srcset="_images/image.png 1x, _images/image%402x.png 2x,'
             ' _images/image%403x.png 3x, _images/image%404x.png 4x"'
             ' alt="_images/image.png" src="_images/image.png" />')
+
+    def test_with_html_and_width_height(self):
+        """Testing image-srcset with HTML and srcset and width/height"""
+        rendered = self.render_doc(
+            '.. image:: path/to/image.png\n'
+            '   :width: 100\n'
+            '   :height: 200\n'
+            '   :sources: 2x path/to/image@2x.png\n'
+            '             3x path/to/image@3x.png\n'
+        )
+
+        self.assertEqual(
+            rendered,
+            '<a class="reference internal image-reference"'
+            ' href="_images/image.png">'
+            '<img srcset="_images/image.png 1x, _images/image%402x.png 2x,'
+            ' _images/image%403x.png 3x" width="100" height="200"'
+            ' alt="_images/image.png" src="_images/image.png" />'
+            '</a>')

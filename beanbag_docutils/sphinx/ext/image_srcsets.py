@@ -59,6 +59,11 @@ if TYPE_CHECKING:
     from sphinx.environment import BuildEnvironment
 
 
+WIDTH_ATTR_RE = re.compile(r' width="(\d+)"')
+HEIGHT_ATTR_RE = re.compile(r' height="(\d+)"')
+STYLE_ATTR_RE = re.compile(r' style="(?P<style>[^"]+)"')
+
+
 def _get_srcsets(
     env,          # type: BuildEnvironment
     node,         # type: nodes.image
@@ -140,17 +145,53 @@ def _visit_image_html(
         last_tag = self.body[-1]
         assert last_tag.startswith('<img ')
 
-        self.body[-1] = (
-            '<img srcset="%s" %s' % (
-                ', '.join(
-                    '%s %s' % (
-                        posixpath.join(base_images_path,
-                                       urllib_quote(images[url][1])),
-                        source)
-                    for source, url in srcsets.items()
-                ),
-                last_tag[len('<img '):],
-            )
+        new_attrs: List[str] = [
+            'srcset="%s"' % ', '.join(
+                '%s %s' % (
+                    posixpath.join(base_images_path,
+                                   urllib_quote(images[url][1])),
+                    source)
+                for source, url in srcsets.items()
+            ),
+        ]
+
+        # Set a width attribute.
+        m = WIDTH_ATTR_RE.search(last_tag)
+
+        if not m and 'width' in node:
+            new_attrs.append('width="%s"' % node['width'])
+
+        # Set a height attribute.
+        m = HEIGHT_ATTR_RE.search(last_tag)
+
+        if not m and 'height' in node:
+            new_attrs.append('height="%s"' % node['height'])
+
+        # Remove dimensions from the style="" attribute.
+        m = STYLE_ATTR_RE.search(last_tag)
+
+        if m:
+            styles = m.group('style').split(';')
+            new_styles: List[str] = [
+                style
+                for style in styles
+                if (style and
+                    not style.lstrip().startswith(('width:', 'height:')))
+            ]
+
+            if new_styles:
+                start, stop = m.span('style')
+                last_tag = '%s%s%s' % (last_tag[:start],
+                                       ';'.join(new_styles),
+                                       last_tag[stop:])
+            else:
+                start, stop = m.span()
+                last_tag = '%s%s' % (last_tag[:start],
+                                     last_tag[stop:])
+
+        self.body[-1] = '<img %s %s' % (
+            ' '.join(new_attrs),
+            last_tag[len('<img '):],
         )
 
 
