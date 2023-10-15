@@ -18,6 +18,7 @@ setup(
     license='MIT',
     description="Sphinx utility modules for Beanbag's documentation format.",
     long_description=readme,
+    long_description_content_type='text/x-rst',
     url='https://github.com/beanbaginc/beanbag-docutils',
     maintainer='Christian Hammond',
     maintainer_email='christian@beanbaginc.com',
