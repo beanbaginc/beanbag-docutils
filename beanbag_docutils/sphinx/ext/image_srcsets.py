@@ -49,7 +49,7 @@ from typing import Dict, List, Optional, TYPE_CHECKING
 from docutils import nodes
 from docutils.parsers.rst import directives
 from docutils.parsers.rst.directives.images import Image
-from six.moves.urllib.parse import quote as urllib_quote
+from urllib.parse import quote as urllib_quote
 from sphinx.application import Sphinx
 from sphinx.util.i18n import search_image_for_language
 
