@@ -5,7 +5,6 @@ from contextlib import contextmanager
 from unittest import TestCase
 from typing import Dict, Iterator
 
-import six
 from sphinx_testing.util import TestApp, docutils_namespace
 
 import beanbag_docutils
@@ -129,7 +128,7 @@ class SphinxExtTestCase(TestCase):
                         with open(path, 'wb') as fp:
                             fp.write(contents)
                     else:
-                        assert isinstance(contents, six.text_type)
+                        assert isinstance(contents, str)
 
                         with open(path, 'w') as fp:
                             fp.write(contents)

@@ -33,7 +33,6 @@ To use this, you just need to add the extension in :file:`conf.py`::
 
 from typing import Any, Dict, TYPE_CHECKING
 
-import six
 from docutils import nodes, __version__ as DOCUTILS_VERSION
 from sphinx.errors import ExtensionError
 
@@ -87,7 +86,7 @@ def _on_doctree_read(
     docname = env.docname
     doc_metadata = env.metadata[docname]
 
-    for key, values in six.iteritems(metadata):
+    for key, values in metadata.items():
         if len(values) == 1:
             doc_metadata[key] = values[0]
         else:

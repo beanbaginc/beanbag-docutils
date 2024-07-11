@@ -1,8 +1,6 @@
-Django>=1.6.11,<=1.11.999; python_version <= "2.7"
 Django>=2.0,<=2.999; python_version == "3.6"
 Django>=3.0; python_version >= "3.7"
 
-pytest~=4.6.11; python_version == "2.7"
 pytest~=7.0.1; python_version == "3.6"
 pytest~=7.1.2; python_version >= "3.7"
 pytest-env~=0.6.2
