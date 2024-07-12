@@ -1,0 +1,23 @@
+====================
+beanbag-docutils 2.4
+====================
+
+**Release date:** TBD
+
+
+Packaging / Compatibility
+=========================
+
+* Added support for Sphinx 7.3.
+
+* Removed unused ``six`` imports, which broke using the module unless
+  the :pypi:`six` package was explicitly installed.
+
+  This was a regression caused by 2.3's packaging.
+
+
+Contributors
+============
+
+* Christian Hammond
+* David Trowbridge
