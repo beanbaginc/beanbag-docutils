@@ -2,7 +2,7 @@
 beanbag-docutils 2.4
 ====================
 
-**Release date:** TBD
+**Release date:** July 11, 2024
 
 
 Packaging / Compatibility
