@@ -146,8 +146,10 @@ Configuration
 
 import re
 import sys
+from typing import Any
 
 from sphinx import version_info
+from sphinx.config import Config
 from sphinx.ext.napoleon.docstring import GoogleDocstring
 
 from beanbag_docutils import VERSION
@@ -671,6 +673,44 @@ def _process_docstring(app, what, name, obj, options, lines):
         lines[:] = docstring.lines()[:]
 
 
+def _replace_config_default(
+    config: Config,
+    name: str,
+    new_default: Any,
+) -> None:
+    """Replace a default Sphinx configuration value.
+
+    This provides compatibility with multiple versions of Sphinx.
+
+    Args:
+        config (sphinx.config.Config):
+            The configuration to modify.
+
+        name (str):
+            The name of the configuration option.
+
+        new_default (object):
+            The new default value for the configuration option.
+    """
+    config_values = config.values
+    value = config_values[name]
+
+    del config_values[name]
+
+    if isinstance(value, tuple):
+        # Sphinx <= 7.2
+        rebuild, types = value[1:]
+    else:
+        # Sphinx >= 7.3
+        rebuild = value.rebuild
+        types = value.valid_types
+
+    config.add(name=name,
+               default=new_default,
+               rebuild=rebuild,
+               types=types)
+
+
 def _on_config_inited(app, config):
     """Override default configuration settings for Napoleon.
 
@@ -697,10 +737,8 @@ def _on_config_inited(app, config):
         config.napoleon_preprocess_types = False
 
         # Change some defaults.
-        config.values['autodoc_member_order'] = \
-            ('bysource',) + config.values['autodoc_member_order'][1:]
-        config.values['autoclass_content'] = \
-            ('class',) + config.values['autoclass_content'][1:]
+        _replace_config_default(config, 'autodoc_member_order', 'bysource')
+        _replace_config_default(config, 'autoclass_content', 'class')
 
         config.autodoc_default_options = dict({
             'members': True,
