@@ -63,7 +63,7 @@ class ImageTests(SphinxExtTestCase):
         )
 
         self.assertEqual(
-            rendered,
+            rendered.replace('\n', ''),
             '<a class="reference internal image-reference"'
             ' href="_images/image.png">'
             '<img srcset="_images/image.png 1x, _images/image%402x.png 2x,'
