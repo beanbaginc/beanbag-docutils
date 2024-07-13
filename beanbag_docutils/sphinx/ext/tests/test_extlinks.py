@@ -1,14 +1,6 @@
 """Unit tests for beanbag_docutils.sphinx.ext.extlinks."""
 
-from sphinx import version_info as sphinx_version_info
-
 from beanbag_docutils.sphinx.ext.tests.testcase import SphinxExtTestCase
-
-
-if sphinx_version_info[:2] >= (4, 0):
-    _bug_caption = 'bug%s'
-else:
-    _bug_caption = 'bug'
 
 
 class ExtLinksTests(SphinxExtTestCase):
@@ -16,7 +8,7 @@ class ExtLinksTests(SphinxExtTestCase):
 
     config = {
         'extlinks': {
-            'bug': ('https://bugs.example.com/%s?#main', _bug_caption),
+            'bug': ('https://bugs.example.com/%s?#main', 'bug%s'),
         },
     }
 

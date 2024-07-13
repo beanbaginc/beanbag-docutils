@@ -1,0 +1,61 @@
+requires = ['setuptools']
+build-backend = 'setuptools.build_meta'
+
+
+[project]
+name = 'beanbag_docutils'
+description = 'Sphinx extensions for building better documentation.'
+authors = [
+    {name = 'Beanbag, Inc.', email = 'questions@beanbaginc.com'},
+]
+license = { text = 'MIT' }
+readme = 'README.rst'
+requires-python = '>=3.8'
+dynamic =  ['version']
+
+dependencies = [
+    'Sphinx>=5.0,<=7.999',
+    'sphinxcontrib-serializinghtml',
+]
+
+keywords = [
+    'documentation',
+    'docs',
+    'sphinx',
+]
+
+classifiers = [
+    'Development Status :: 5 - Production/Stable',
+    'Environment :: Other Environment',
+    'Framework :: Sphinx',
+    'Framework :: Sphinx :: Extension',
+    'Intended Audience :: Developers',
+    'License :: OSI Approved :: MIT License',
+    'Operating System :: OS Independent',
+    'Programming Language :: Python',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11',
+    'Programming Language :: Python :: 3.12',
+    'Topic :: Documentation',
+    'Topic :: Documentation :: Sphinx',
+    'Topic :: Software Development',
+    'Topic :: Software Development :: Documentation',
+    'Topic :: Software Development :: Libraries :: Python Modules',
+]
+
+
+[project.urls]
+homepage = 'https://github.com/beanbaginc/beanbag-docutils'
+documentation = 'https://github.com/beanbaginc/beanbag-docutils'
+repository = 'https://github.com/beanbaginc/beanbag-docutils'
+
+
+[tool.setuptools]
+packages = ['beanbag_docutils']
+
+
+[tool.setuptools.dynamic]
+version = { attr = 'beanbag_docutils.get_package_version' }
