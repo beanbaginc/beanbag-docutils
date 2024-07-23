@@ -3,7 +3,7 @@ build-backend = 'setuptools.build_meta'
 
 
 [project]
-name = 'beanbag_docutils'
+name = 'beanbag-docutils'
 description = 'Sphinx extensions for building better documentation.'
 authors = [
     {name = 'Beanbag, Inc.', email = 'questions@beanbaginc.com'},
