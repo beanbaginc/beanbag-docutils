@@ -14,7 +14,7 @@ requires-python = '>=3.8'
 dynamic =  ['version']
 
 dependencies = [
-    'Sphinx>=5.0,<=7.999',
+    'Sphinx>=5.0,<=8.999',
     'sphinxcontrib-serializinghtml',
 ]
 
