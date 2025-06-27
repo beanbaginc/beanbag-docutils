@@ -1,55 +1,64 @@
+"""Base definitions and version info for beanbag_docutils."""
+
+from __future__ import annotations
+
 #: The version of beanbag_docutils.
 #:
 #: This is in the format of:
 #:
 #:   (Major, Minor, Micro, alpha/beta/rc/final, Release Number, Released)
 #:
-VERSION = (3, 0, 0, 'alpha', 0, False)
+VERSION: tuple[int, int, int, str, int, bool] = \
+    (3, 0, 0, 'alpha', 0, False)
 
 
-def get_version_string():
+def get_version_string() -> str:
     """Return the version as a human-readable string.
 
     Returns:
-        unicode:
+        str:
         The version number as a human-readable string.
     """
-    version = '%s.%s' % (VERSION[0], VERSION[1])
+    major, minor, micro, release_type, release_num, _released = VERSION
 
-    if VERSION[2]:
-        version += ".%s" % VERSION[2]
+    version = f'{major}.{minor}'
 
-    if VERSION[3] != 'final':
-        if VERSION[3] == 'rc':
-            version += ' RC%s' % VERSION[4]
+    if micro:
+        version += f'.{micro}'
+
+    if release_type != 'final':
+        if release_type == 'rc':
+            version += f' RC{release_num}'
         else:
-            version += ' %s %s' % (VERSION[3], VERSION[4])
+            version += f' {release_type} {release_num}'
 
     if not is_release():
-        version += " (dev)"
+        version += ' (dev)'
 
     return version
 
 
-def get_package_version():
+def get_package_version() -> str:
     """Return the version as a Python package version string.
 
     Returns:
-        unicode:
+        str:
         The version number as used in a Python package.
     """
-    version = '%s.%s' % (VERSION[0], VERSION[1])
+    major, minor, micro, release_type, release_num, _released = VERSION
 
-    if VERSION[2]:
-        version += ".%s" % VERSION[2]
+    version = f'{major}.{minor}'
 
-    if VERSION[3] != 'final':
-        version += '%s%s' % (VERSION[3], VERSION[4])
+    if micro:
+        version += f'.{micro}'
+
+    if release_type != 'final':
+        version += f'{release_type}{release_num}'
 
     return version
 
 
-def is_release():
+def is_release() -> bool:
     """Return whether this is a released version.
 
     Returns:
