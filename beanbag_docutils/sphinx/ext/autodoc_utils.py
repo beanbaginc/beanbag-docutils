@@ -94,6 +94,21 @@ with these defaults.
    http://www.sphinx-doc.org/en/stable/ext/autodoc.html#event-autodoc-skip-member
 
 
+Better Documentation for Inherited TypedDicts
+=============================================
+
+.. versionadded:: 3.0
+
+When a TypedDict inherits from another, the actual MRO is flattened, leaving
+any attributes that come from the parent classes without docstrings/comments in
+the generated documentation. Including ``autodoc_utils`` will automatically fix
+these to scan the original base classes when docs are missing for some members.
+
+This uses ``__orig_bases__``, which was added for TypedDict in Python 3.11. If
+using this with older versions of Python,
+:py:class:`typing_extensions.TypedDict` should be used instead.
+
+
 Setup
 =====
 
@@ -148,10 +163,13 @@ from __future__ import annotations
 
 import re
 import sys
+from inspect import isclass
 from typing import TYPE_CHECKING, TypedDict
 
 from sphinx import version_info
+from sphinx.ext.autodoc import AttributeDocumenter, ClassDocumenter
 from sphinx.ext.napoleon.docstring import GoogleDocstring
+from sphinx.pycode import ModuleAnalyzer
 
 from beanbag_docutils import get_version_string
 
@@ -161,7 +179,7 @@ if TYPE_CHECKING:
 
     from sphinx.application import Sphinx
     from sphinx.config import Config
-    from sphinx.ext.autodoc import Options
+    from sphinx.ext.autodoc import ObjectMember, Options
     from sphinx.util.typing import ExtensionMetadata
     from typing_extensions import NotRequired
 
@@ -904,6 +922,147 @@ def _on_config_inited(
     config.autodoc_excludes = new_autodoc_excludes
 
 
+#: A cache of docstrings which were extracted for inherited TypedDicts.
+#:
+#: Version Added:
+#:     3.0
+_found_docstrings: dict[tuple[type, str], Sequence[str]] = {}
+
+
+class BeanbagClassDocumenter(ClassDocumenter):
+    """A ClassDocumenter that handles docstrings for inherited TypedDicts.
+
+    When a TypedDict inherits from another, the MRO is flattened so the class
+    inherits directly from :py:class:`dict`, making it so Sphinx can't find
+    docstrings/comments for attributes that come from parent classes. This
+    class will iterate up the ``__orig_bases__`` chain in order to find
+    docstrings in parent classes.
+
+    The docstrings are returned here (in case any custom templates are using
+    the loaded member data), and also cached in :py:data:`_found_docstrings`,
+    which is used by :py:class:`BeanbagAttributeDocumenter` to actually output
+    the documentation for the attributes.
+
+    Version Added:
+        3.0
+    """
+
+    def get_object_members(
+        self,
+        want_all: bool,
+    ) -> tuple[bool, list[ObjectMember]]:
+        """Get members for the class.
+
+        Args:
+            want_all (bool):
+                Whether to get all members for the class.
+
+        Returns:
+            tuple:
+            A 2-tuple of:
+
+            Tuple:
+                0 (bool):
+                    Whether to check if the item is actually in the module. In
+                    effect this will always be ``False``.
+
+                1 (list of sphinx.ext.autodoc.ObjectMember):
+                    The list of members to document.
+        """
+        check, members = super().get_object_members(want_all)
+
+        obj = self.object
+
+        if not isclass(obj) or not issubclass(obj, dict):
+            return check, members
+
+        if orig_bases := getattr(obj, '__orig_bases__', None):
+            for member in members:
+                name = member.__name__
+
+                if (member.docstring is None and not
+                    name.startswith('__')):
+                    docstring = self._get_inherited_docstring(
+                        name, orig_bases)
+
+                    if docstring:
+                        _found_docstrings[obj, name] = docstring
+                        member.docstring = '\n'.join(docstring)
+
+        return check, members
+
+    def _get_inherited_docstring(
+        self,
+        name: str,
+        orig_bases: Sequence[type],
+    ) -> Sequence[str] | None:
+        """Get the docstring for an inherited attribute.
+
+        Args:
+            name (str):
+                The name of the attribute.
+
+            orig_bases (list of type):
+                The list of original bases to search for the docstring.
+
+        Returns:
+            list of str:
+            The docstring of the attribute, split into lines.
+        """
+        for orig_base in orig_bases:
+            analyzer = ModuleAnalyzer.for_module(orig_base.__module__)
+            analyzer.analyze()
+
+            docs = analyzer.attr_docs.get((orig_base.__name__, name))
+
+            if docs is not None:
+                return docs
+
+        # If we didn't find it, go through the bases again and see if any of
+        # those are themselves inherited TypedDicts.
+        for orig_base in orig_bases:
+            if new_orig_bases := getattr(orig_base, '__orig_bases__', None):
+                docs = self._get_inherited_docstring(name, new_orig_bases)
+
+                if docs:
+                    return docs
+
+        return None
+
+
+class BeanbagAttributeDocumenter(AttributeDocumenter):
+    """An AttributeDocumenter that handles docstrings for inherited TypedDicts.
+
+    Version Added:
+        3.0
+    """
+
+    def get_attribute_comment(
+        self,
+        parent: Any,
+        attrname: str,
+    ) -> list[str] | None:
+        """Return the comment for the attribute.
+
+        Args:
+            parent (type):
+                The parent class of the attribute.
+
+            attrname (str):
+                The name of the attribute.
+
+        Returns:
+            list of str:
+            The docstring/doc comment of the attribute, split into lines.
+        """
+        comment = super().get_attribute_comment(parent, attrname)
+
+        if comment is None:
+            comment = _found_docstrings.get((parent, attrname))
+
+        return comment
+
+
 def setup(
     app: Sphinx,
 ) -> ExtensionMetadata:
@@ -929,6 +1088,9 @@ def setup(
     app.connect('autodoc-skip-member', _filter_members)
     app.connect('autodoc-process-docstring', _process_docstring)
     app.connect('config-inited', _on_config_inited)
+
+    app.add_autodocumenter(BeanbagAttributeDocumenter, override=True)
+    app.add_autodocumenter(BeanbagClassDocumenter, override=True)
 
     return {
         'version': get_version_string(),

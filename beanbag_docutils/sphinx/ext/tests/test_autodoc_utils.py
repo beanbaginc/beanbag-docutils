@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from sphinx import version_info as sphinx_version_info
+from typing_extensions import TypedDict
 
 from beanbag_docutils.sphinx.ext import autodoc_utils
 from beanbag_docutils.sphinx.ext.autodoc_utils import BeanbagDocstring
@@ -29,6 +30,25 @@ class DocClass1:  # noqa
 class DocClass2:  # noqa
     def foo(self):  # noqa
         pass
+
+
+# Classes for testing TypedDict inheritance.
+class BaseTypedDict(TypedDict):
+    """Base TypedDict class."""
+
+    #: Base field with documentation.
+    base_field: str
+
+
+# Test classes for documenting actual behavior vs expected behavior.
+class InheritedTypedDict(BaseTypedDict):
+    """Inherited TypedDict class."""
+
+    #: Inherited field with documentation.
+    inherited_field: int
+
+    #: Another field with documentation.
+    another_field: str
 
 
 class AutoDocExcludesTests(SphinxExtTestCase):
@@ -609,6 +629,75 @@ class BeanbagDocstringTests(SphinxExtTestCase):
         """
         with self.with_sphinx_env() as ctx:
             return str(BeanbagDocstring(content, config=ctx['config']))
+
+
+class TypedDictInheritanceTests(SphinxExtTestCase):
+    """Unit tests for TypedDict inheritance feature."""
+
+    extensions = [
+        autodoc_utils.__name__,
+    ]
+
+    def test_base_typeddict_docstrings(self) -> None:
+        """Testing base TypedDict documentation (no inheritance)"""
+        doc = (
+            f'.. autoclass:: {BaseTypedDict.__module__}.'
+            f'{BaseTypedDict.__name__}'
+        )
+
+        rendered = self.render_doc(doc)
+
+        # Check that the class itself is documented.
+        self.assertIn('BaseTypedDict', rendered)
+        self.assertIn('Base TypedDict class.', rendered)
+
+        # Check that attributes are documented.
+        self.assertIn('base_field', rendered)
+        self.assertIn('Base field with documentation.', rendered)
+
+    def test_inherited_typeddict_docstrings(self) -> None:
+        """Testing inherited TypedDict documentation"""
+        doc = (
+            f'.. autoclass:: {InheritedTypedDict.__module__}.'
+            f'{InheritedTypedDict.__name__}'
+        )
+
+        rendered = self.render_doc(doc)
+
+        # Check that the class itself is documented.
+        self.assertIn('InheritedTypedDict', rendered)
+        self.assertIn('Inherited TypedDict class.', rendered)
+
+        # Check that attributes in the inherited class are documented.
+        self.assertIn('inherited_field', rendered)
+        self.assertIn('Inherited field with documentation.', rendered)
+        self.assertIn('another_field', rendered)
+        self.assertIn('Another field with documentation.', rendered)
+
+        # Check that attributes which come from the parent class are
+        # documented.
+        self.assertIn('base_field', rendered)
+        self.assertIn('Base field with documentation.', rendered)
+
+    def test_non_typeddict_class_unchanged(self) -> None:
+        """Testing that non-TypedDict classes are unaffected"""
+        doc = f'.. autoclass:: {DocClass1.__module__}.{DocClass1.__name__}'
+
+        rendered = self.render_doc(doc)
+
+        # Check that regular classes still work normally.
+        self.assertIn('DocClass1', rendered)
+        self.assertIn('foo', rendered)
+        self.assertIn('bar', rendered)
+
+    def test_beanbag_class_documenter_dict_subclass_check(self) -> None:
+        """Testing BeanbagClassDocumenter properly checks for dict subclasses
+        """
+        # Test that TypedDict is recognized as dict subclass.
+        self.assertTrue(issubclass(BaseTypedDict, dict))
+
+        # Test that regular classes are not dict subclasses.
+        self.assertFalse(issubclass(DocClass1, dict))
 
 
 __autodoc_excludes__ = ['IgnoredModule']
