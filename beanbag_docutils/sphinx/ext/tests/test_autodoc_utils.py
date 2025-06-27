@@ -1,5 +1,7 @@
 """Unit tests for beanbag_docutils.sphinx.ext.autodoc_utils."""
 
+from __future__ import annotations
+
 from sphinx import version_info as sphinx_version_info
 
 from beanbag_docutils.sphinx.ext import autodoc_utils
@@ -8,24 +10,24 @@ from beanbag_docutils.sphinx.ext.tests.testcase import SphinxExtTestCase
 
 
 # A series of modules used to test autodoc exclusions.
-class IgnoredModule(object):
+class IgnoredModule:  # noqa
     pass
 
 
-class DeprecatedModule(object):
+class DeprecatedModule:  # noqa
     pass
 
 
-class DocClass1(object):
-    def foo(self):
+class DocClass1:  # noqa
+    def foo(self):  # noqa
         pass
 
-    def bar(self):
+    def bar(self):  # noqa
         pass
 
 
-class DocClass2(object):
-    def foo(self):
+class DocClass2:  # noqa
+    def foo(self):  # noqa
         pass
 
 
@@ -46,21 +48,19 @@ class AutoDocExcludesTests(SphinxExtTestCase):
         autodoc_utils.__name__,
     ]
 
-    def test_with_autodoc_excludes(self):
+    def test_with_autodoc_excludes(self) -> None:
         """Testing autodoc_excludes with __autodoc_excludes__ in module"""
-        rendered = self.render_doc('.. automodule:: %s\n' % __name__)
+        rendered = self.render_doc(f'.. automodule:: {__name__}\n')
 
         self.assertIn('AutoDocExcludesTests', rendered)
         self.assertNotIn('IgnoredModule', rendered)
 
-    def test_with_wildcard_exclude(self):
+    def test_with_wildcard_exclude(self) -> None:
         """Testing autodoc_excludes with wildcard (*) exclude list"""
         doc = '\n'.join([
-            '.. autoclass:: %s.%s' % (DocClass1.__module__,
-                                      DocClass2.__name__),
+            f'.. autoclass:: {DocClass1.__module__}.{DocClass1.__name__}',
             '',
-            '.. autoclass:: %s.%s' % (DocClass1.__module__,
-                                      DocClass2.__name__),
+            f'.. autoclass:: {DocClass2.__module__}.{DocClass2.__name__}',
         ])
 
         rendered = self.render_doc(
@@ -76,32 +76,28 @@ class AutoDocExcludesTests(SphinxExtTestCase):
         self.assertNotIn('foo', rendered)
         self.assertIn('__module__', rendered)
 
-    def test_with_wildcard_exclude_with_defaults(self):
+    def test_with_wildcard_exclude_with_defaults(self) -> None:
         """Testing autodoc_excludes with wildcard (*) exclude list with
         defaults
         """
         doc = '\n'.join([
-            '.. autoclass:: %s.%s' % (DocClass1.__module__,
-                                      DocClass2.__name__),
+            f'.. autoclass:: {DocClass1.__module__}.{DocClass1.__name__}',
             '',
-            '.. autoclass:: %s.%s' % (DocClass1.__module__,
-                                      DocClass2.__name__),
+            f'.. autoclass:: {DocClass2.__module__}.{DocClass2.__name__}',
         ])
 
         rendered = self.render_doc(doc)
 
         self.assertIn('foo', rendered)
 
-    def test_with_wildcard_exclude_added_to_defaults(self):
+    def test_with_wildcard_exclude_added_to_defaults(self) -> None:
         """Testing autodoc_excludes with wildcard (*) exclude list added to
         defaults
         """
         doc = '\n'.join([
-            '.. autoclass:: %s.%s' % (DocClass1.__module__,
-                                      DocClass1.__name__),
+            f'.. autoclass:: {DocClass1.__module__}.{DocClass1.__name__}',
             '',
-            '.. autoclass:: %s.%s' % (DocClass2.__module__,
-                                      DocClass2.__name__),
+            f'.. autoclass:: {DocClass2.__module__}.{DocClass2.__name__}',
         ])
 
         rendered = self.render_doc(
@@ -118,15 +114,12 @@ class AutoDocExcludesTests(SphinxExtTestCase):
         self.assertNotIn('foo', rendered)
         self.assertNotIn('__module__', rendered)
 
-    def test_with_class_attr_exclude(self):
+    def test_with_class_attr_exclude(self) -> None:
         """Testing autodoc_excludes with class exclude list"""
-        docclass1_path = '%s.%s' % (DocClass1.__module__, DocClass1.__name__)
-
         doc = '\n'.join([
-            '.. autoclass:: %s' % docclass1_path,
+            f'.. autoclass:: {DocClass1.__module__}.{DocClass1.__name__}',
             '',
-            '.. autoclass:: %s.%s' % (DocClass2.__module__,
-                                      DocClass2.__name__),
+            f'.. autoclass:: {DocClass2.__module__}.{DocClass2.__name__}',
         ])
 
         # Now exclude them.
@@ -147,15 +140,12 @@ class AutoDocExcludesTests(SphinxExtTestCase):
         self.assertNotIn('DocClass2.__dict__', rendered)
         self.assertNotIn('DocClass2.foo', rendered)
 
-    def test_with_class_attr_exclude_with_defaults(self):
+    def test_with_class_attr_exclude_with_defaults(self) -> None:
         """Testing autodoc_excludes with class exclude list with defaults"""
-        docclass1_path = '%s.%s' % (DocClass1.__module__, DocClass1.__name__)
-
         doc = '\n'.join([
-            '.. autoclass:: %s' % docclass1_path,
+            f'.. autoclass:: {DocClass1.__module__}.{DocClass1.__name__}',
             '',
-            '.. autoclass:: %s.%s' % (DocClass2.__module__,
-                                      DocClass2.__name__),
+            f'.. autoclass:: {DocClass2.__module__}.{DocClass2.__name__}',
         ])
 
         # Make sure the attributes on these classes are here by default.
@@ -169,17 +159,14 @@ class AutoDocExcludesTests(SphinxExtTestCase):
         self.assertNotIn('DocClass2.__dict__', rendered)
         self.assertNotIn('DocClass2.__module__', rendered)
 
-    def test_with_class_attr_exclude_and_added_to_defaults(self):
+    def test_with_class_attr_exclude_and_added_to_defaults(self) -> None:
         """Testing autodoc_excludes with class exclude list and added with
         defaults
         """
-        docclass1_path = '%s.%s' % (DocClass1.__module__, DocClass1.__name__)
-
         doc = '\n'.join([
-            '.. autoclass:: %s' % docclass1_path,
+            f'.. autoclass:: {DocClass1.__module__}.{DocClass1.__name__}',
             '',
-            '.. autoclass:: %s.%s' % (DocClass1.__module__,
-                                      DocClass2.__name__),
+            f'.. autoclass:: {DocClass2.__module__}.{DocClass2.__name__}',
         ])
 
         # Now exclude them.
@@ -201,14 +188,12 @@ class AutoDocExcludesTests(SphinxExtTestCase):
         self.assertNotIn('DocClass2.__dict__', rendered)
         self.assertNotIn('DocClass2.foo', rendered)
 
-    def test_with_empty_excludes(self):
+    def test_with_empty_excludes(self) -> None:
         """Testing autodoc_excludes with empty excludes"""
         doc = '\n'.join([
-            '.. autoclass:: %s.%s' % (DocClass1.__module__,
-                                      DocClass1.__name__),
+            f'.. autoclass:: {DocClass1.__module__}.{DocClass1.__name__}',
             '',
-            '.. autoclass:: %s.%s' % (DocClass2.__module__,
-                                      DocClass2.__name__),
+            f'.. autoclass:: {DocClass2.__module__}.{DocClass2.__name__}',
         ])
 
         # Make sure some our attributes are here by default.
@@ -223,9 +208,9 @@ class AutoDocExcludesTests(SphinxExtTestCase):
         self.assertIn('__module__', rendered)
         self.assertIn('DocClass1.__module__', rendered)
 
-    def test_with_deprecated(self):
+    def test_with_deprecated(self) -> None:
         """Testing autodoc_excludes with __deprecated__ in module"""
-        rendered = self.render_doc('.. automodule:: %s\n' % __name__)
+        rendered = self.render_doc(f'.. automodule:: {__name__}\n')
 
         self.assertIn('AutoDocExcludesTests', rendered)
         self.assertNotIn('DeprecatedModule', rendered)
@@ -238,7 +223,7 @@ class BeanbagDocstringTests(SphinxExtTestCase):
         autodoc_utils.__name__,
     ]
 
-    def test_args_section(self):
+    def test_args_section(self) -> None:
         """Testing Beanbag docstring with Args section"""
         rendered = self._render_docstring(
             'Args:\n'
@@ -257,7 +242,9 @@ class BeanbagDocstringTests(SphinxExtTestCase):
             '       Description of kwargs.\n'
         )
 
-        if sphinx_version_info[:2] >= (7, 2):
+        # Type is ignored here because some type checkers get annoyed at
+        # comparing tuple[Literal[], ...].
+        if sphinx_version_info[:2] >= (7, 2):  # type:ignore
             self.assertEqual(
                 rendered,
                 ':param arg1: Description of arg1.\n'
@@ -280,7 +267,7 @@ class BeanbagDocstringTests(SphinxExtTestCase):
                 ':param \\*\\*kwargs: Description of kwargs.\n'
                 ':type \\*\\*kwargs: :class:`dict`\n')
 
-    def test_context_section_with_description(self):
+    def test_context_section_with_description(self) -> None:
         """Testing Beanbag docstring with Context section with description"""
         self.assertEqual(
             self._render_docstring(
@@ -290,7 +277,7 @@ class BeanbagDocstringTests(SphinxExtTestCase):
             ':Context: Description of the context.\n'
         )
 
-    def test_context_section_with_type(self):
+    def test_context_section_with_type(self) -> None:
         """Testing Beanbag docstring with Context section with type"""
         self.assertEqual(
             self._render_docstring(
@@ -300,7 +287,7 @@ class BeanbagDocstringTests(SphinxExtTestCase):
             ':Context: dict\n'
         )
 
-    def test_context_section_with_type_and_description(self):
+    def test_context_section_with_type_and_description(self) -> None:
         """Testing Beanbag docstring with Context section with type and
         description
         """
@@ -310,7 +297,7 @@ class BeanbagDocstringTests(SphinxExtTestCase):
             '    Description of the context.\n'
         )
 
-        if sphinx_version_info[:2] >= (7, 2):
+        if sphinx_version_info[:2] >= (7, 2):  # type:ignore
             self.assertEqual(
                 rendered,
                 ':Context: :py:class:`dict` -- Description of the context.\n')
@@ -319,7 +306,7 @@ class BeanbagDocstringTests(SphinxExtTestCase):
                 rendered,
                 ':Context: :class:`dict` -- Description of the context.\n')
 
-    def test_deprecated_section_with_version(self):
+    def test_deprecated_section_with_version(self) -> None:
         """Testing Beanbag docstring with Deprecated section with version"""
         self.assertEqual(
             self._render_docstring(
@@ -329,7 +316,7 @@ class BeanbagDocstringTests(SphinxExtTestCase):
             '.. deprecated:: 2.0\n\n'
         )
 
-    def test_deprecated_section_with_version_and_description(self):
+    def test_deprecated_section_with_version_and_description(self) -> None:
         """Testing Beanbag docstring with Deprecated section with version and
         description
         """
@@ -346,7 +333,7 @@ class BeanbagDocstringTests(SphinxExtTestCase):
             )
         )
 
-    def test_deprecated_section_with_version_and_lists(self):
+    def test_deprecated_section_with_version_and_lists(self) -> None:
         """Testing Beanbag docstring with Deprecated section with lists"""
         self.assertEqual(
             self._render_docstring(
@@ -371,7 +358,7 @@ class BeanbagDocstringTests(SphinxExtTestCase):
             )
         )
 
-    def test_keys(self):
+    def test_keys(self) -> None:
         """Testing Beanbag docstring with Keys section"""
         rendered = self._render_docstring(
             'Keys:\n'
@@ -385,7 +372,7 @@ class BeanbagDocstringTests(SphinxExtTestCase):
             '        Description 3\n'
         )
 
-        if sphinx_version_info[:2] >= (7, 2):
+        if sphinx_version_info[:2] >= (7, 2):  # type:ignore
             self.assertEqual(
                 rendered,
                 ':Keys: * **key1** (:py:class:`str`) -- Description 1\n'
@@ -400,7 +387,7 @@ class BeanbagDocstringTests(SphinxExtTestCase):
                 '       * **key3** (:class:`int`, *optional*)'
                 ' -- Description 3\n')
 
-    def test_model_attributes(self):
+    def test_model_attributes(self) -> None:
         """Testing Beanbag docstring with Model Attributes section"""
         rendered = self._render_docstring(
             'Model Attributes:\n'
@@ -412,7 +399,7 @@ class BeanbagDocstringTests(SphinxExtTestCase):
             '        Description of attr2\n'
         )
 
-        if sphinx_version_info[:2] >= (7, 2):
+        if sphinx_version_info[:2] >= (7, 2):  # type:ignore
             self.assertEqual(
                 rendered,
                 ':Model Attributes: * **attr1** (:py:class:`dict`)'
@@ -427,8 +414,7 @@ class BeanbagDocstringTests(SphinxExtTestCase):
                 '                   * **attr2** (:class:`foo.bar.baz`)'
                 ' -- Description of attr2\n')
 
-
-    def test_option_args(self):
+    def test_option_args(self) -> None:
         """Testing Beanbag docstring with Option Args section"""
         rendered = self._render_docstring(
             'Option Args:\n'
@@ -441,7 +427,7 @@ class BeanbagDocstringTests(SphinxExtTestCase):
             '        Description of attr2\n'
         )
 
-        if sphinx_version_info[:2] >= (7, 2):
+        if sphinx_version_info[:2] >= (7, 2):  # type:ignore
             self.assertEqual(
                 rendered,
                 ':Option Args: * **attr1** (:py:class:`dict`)'
@@ -456,7 +442,7 @@ class BeanbagDocstringTests(SphinxExtTestCase):
                 '              * **attr2** (:class:`foo.bar.baz`, *optional*)'
                 ' -- Description of attr2\n')
 
-    def test_tuple(self):
+    def test_tuple(self) -> None:
         """Testing Beanbag docstring with Tuple section"""
         rendered = self._render_docstring(
             'Tuple:\n'
@@ -470,7 +456,7 @@ class BeanbagDocstringTests(SphinxExtTestCase):
             '        Description 3\n'
         )
 
-        if sphinx_version_info[:2] >= (7, 2):
+        if sphinx_version_info[:2] >= (7, 2):  # type:ignore
             self.assertEqual(
                 rendered,
                 ':Tuple: * **0** (:py:class:`str`) -- Description 1\n'
@@ -485,19 +471,19 @@ class BeanbagDocstringTests(SphinxExtTestCase):
                 '        * **2** (:class:`int`, *optional*) -- '
                 'Description 3\n')
 
-    def test_type_section(self):
+    def test_type_section(self) -> None:
         """Testing Beanbag docstring with Type section"""
         rendered = self._render_docstring(
             'Type:\n'
             '    dict\n'
         )
 
-        if sphinx_version_info[:2] >= (7, 2):
+        if sphinx_version_info[:2] >= (7, 2):  # type:ignore
             self.assertEqual(rendered, ':Type: :py:class:`dict`\n')
         else:
             self.assertEqual(rendered, ':Type: :class:`dict`\n')
 
-    def test_type_section_with_description(self):
+    def test_type_section_with_description(self) -> None:
         """Testing Beanbag docstring with Type section with description"""
         rendered = self._render_docstring(
             'Type:\n'
@@ -505,14 +491,14 @@ class BeanbagDocstringTests(SphinxExtTestCase):
             '    Description.\n'
         )
 
-        if sphinx_version_info[:2] >= (7, 2):
+        if sphinx_version_info[:2] >= (7, 2):  # type:ignore
             self.assertEqual(rendered,
                              ':Type: :py:class:`dict` -- Description.\n')
         else:
             self.assertEqual(rendered,
                              ':Type: :class:`dict` -- Description.\n')
 
-    def test_version_added_section_with_version(self):
+    def test_version_added_section_with_version(self) -> None:
         """Testing Beanbag docstring with Version Added section with version"""
         self.assertEqual(
             self._render_docstring(
@@ -525,7 +511,7 @@ class BeanbagDocstringTests(SphinxExtTestCase):
             )
         )
 
-    def test_version_added_section_with_version_and_description(self):
+    def test_version_added_section_with_version_and_description(self) -> None:
         """Testing Beanbag docstring with Version Added section with version
         and description
         """
@@ -542,7 +528,7 @@ class BeanbagDocstringTests(SphinxExtTestCase):
             )
         )
 
-    def test_version_added_section_with_lists(self):
+    def test_version_added_section_with_lists(self) -> None:
         """Testing Beanbag docstring with Version Added section with lists"""
         self.assertEqual(
             self._render_docstring(
@@ -567,7 +553,7 @@ class BeanbagDocstringTests(SphinxExtTestCase):
             )
         )
 
-    def test_version_changed_section(self):
+    def test_version_changed_section(self) -> None:
         """Testing Beanbag docstring with Version Changed section"""
         self.assertEqual(
             self._render_docstring(
@@ -582,7 +568,7 @@ class BeanbagDocstringTests(SphinxExtTestCase):
             )
         )
 
-    def test_version_changed_section_with_lists(self):
+    def test_version_changed_section_with_lists(self) -> None:
         """Testing Beanbag docstring with Version Changed section with lists"""
         self.assertEqual(
             self._render_docstring(
@@ -607,15 +593,18 @@ class BeanbagDocstringTests(SphinxExtTestCase):
             )
         )
 
-    def _render_docstring(self, content):
+    def _render_docstring(
+        self,
+        content: str,
+    ) -> str:
         """Render a Beanbag docstring to ReST.
 
         Args:
-            content (unicode):
+            content (str):
                 The docstring content to render.
 
         Returns:
-            unicode:
+            str:
             The resulting ReStructuredText.
         """
         with self.with_sphinx_env() as ctx:

@@ -144,27 +144,55 @@ Configuration
     .. versionadded:: 2.0
 """
 
+from __future__ import annotations
+
 import re
 import sys
-from typing import Any
+from typing import TYPE_CHECKING, TypedDict
 
 from sphinx import version_info
-from sphinx.config import Config
 from sphinx.ext.napoleon.docstring import GoogleDocstring
 
-from beanbag_docutils import VERSION
+from beanbag_docutils import get_version_string
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping, Sequence
+    from typing import Any
+
+    from sphinx.application import Sphinx
+    from sphinx.config import Config
+    from sphinx.ext.autodoc import Options
+    from sphinx.util.typing import ExtensionMetadata
+    from typing_extensions import NotRequired
 
 try:
     from sphinx.ext.napoleon.docstring import _convert_type_spec
 except ImportError:
-    def _convert_type_spec(type_part, type_aliases):
-        try:
-            return type_aliases[type_part]
-        except KeyError:
-            if type_part == 'None':
-                return ':obj:`None`'
-            else:
-                return ':class:`%s`' % type_part
+    if TYPE_CHECKING:
+        assert False
+    else:
+        def _convert_type_spec(
+            type_part: str,
+            type_aliases: Mapping[str, str],
+        ) -> str:
+            try:
+                return type_aliases[type_part]
+            except KeyError:
+                if type_part == 'None':
+                    return ':obj:`None`'
+                else:
+                    return f':class:`{type_part}`'
+
+
+class ReturnsSectionOptions(TypedDict):
+    """Options for registering a "Returns"-like section.
+
+    Version Added:
+        3.0
+    """
+
+    #: Whether the type is required, and assumed to be the first line.
+    require_type: NotRequired[bool]
 
 
 class BeanbagDocstring(GoogleDocstring):
@@ -186,21 +214,23 @@ class BeanbagDocstring(GoogleDocstring):
         re.compile(r'\s*(.+?)\s*\(\s*(.*[^\s]+)\s*[^:)]*$')
     partial_typed_arg_end_re = re.compile(r'\s*(.+?)\s*\):$')
 
-    extra_returns_sections = [
+    extra_returns_sections: Sequence[
+        tuple[str, str, ReturnsSectionOptions]
+    ] = [
         ('context', 'Context', {}),
         ('type', 'Type', {
             'require_type': True,
         }),
     ]
 
-    extra_fields_sections = [
+    extra_fields_sections: Sequence[tuple[str, str]] = [
         ('keys', 'Keys'),
         ('model attributes', 'Model Attributes'),
         ('option args', 'Option Args'),
         ('tuple', 'Tuple'),
     ]
 
-    extra_version_info_sections = [
+    extra_version_info_sections: Sequence[tuple[str, str]] = [
         ('deprecated', 'deprecated'),
         ('version added', 'versionadded'),
         ('version changed', 'versionchanged'),
@@ -210,9 +240,11 @@ class BeanbagDocstring(GoogleDocstring):
 
     COMMA_RE = re.compile(r',\s*')
 
-    _USES_LINES_DEQUE = (version_info[:2] >= (5, 1))
+    # Type is ignored here because some type checkers get annoyed at comparing
+    # tuple[Literal[], ...].
+    _USES_LINES_DEQUE = (version_info[:2] >= (5, 1))  # type: ignore
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         """Initialize the parser.
 
         Args:
@@ -222,10 +254,11 @@ class BeanbagDocstring(GoogleDocstring):
             **kwargs (dict):
                 Keyword arguments for the parent.
         """
-        super(BeanbagDocstring, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         for keyword, label, options in self.extra_returns_sections:
-            self.register_returns_section(keyword, label, options)
+            self.register_returns_section(
+                keyword, label, options)
 
         for keyword, label in self.extra_fields_sections:
             self.register_fields_section(keyword, label)
@@ -235,55 +268,64 @@ class BeanbagDocstring(GoogleDocstring):
 
         self._parse(True)
 
-    def register_returns_section(self, keyword, label, options={}):
+    def register_returns_section(
+        self,
+        keyword: str,
+        label: str,
+        options: (ReturnsSectionOptions | None) = None,
+    ) -> None:
         """Register a Returns-like section with the given keyword and label.
 
         Args:
-            keyword (unicode):
+            keyword (str):
                 The keyword used in the docs.
 
-            label (unicode):
+            label (str):
                 The label outputted in the section.
 
-            options (dict, optional):
+            options (ReturnsSectionOptions, optional):
                 Options for the registration.
-
-                This accepts:
-
-                Keys:
-                    require_type (bool, optional):
-                        Whether the type is required, and assumed to be the
-                        first line.
 
                 Version Added:
                     2.0
         """
+        if options is None:
+            options = {}
+
         self._sections[keyword] = lambda *args: \
             self._format_fields(
                 label,
                 self._consume_returns_section(**options))
 
-    def register_fields_section(self, keyword, label):
+    def register_fields_section(
+        self,
+        keyword: str,
+        label: str,
+    ) -> None:
         """Register a fields section with the given keyword and label.
 
         Args:
-            keyword (unicode):
+            keyword (str):
                 The keyword used in the docs.
 
-            label (unicode):
+            label (str):
                 The label outputted in the section.
         """
         self._sections[keyword] = lambda *args: \
             self._format_fields(label, self._consume_fields())
 
-    def register_version_info_section(self, keyword, admonition):
+    def register_version_info_section(
+        self,
+        keyword: str,
+        admonition: str,
+    ) -> None:
         """Register a version section with the given keyword and admonition.
 
         Args:
-            keyword (unicode):
+            keyword (str):
                 The keyword used in the docs.
 
-            admonition (unicode):
+            admonition (str):
                 The admonition to use for the section.
         """
         self._sections[keyword] = lambda *args: \
@@ -291,18 +333,22 @@ class BeanbagDocstring(GoogleDocstring):
                 admonition,
                 self._consume_to_next_section())
 
-    def _format_admonition_with_params(self, admonition, lines):
+    def _format_admonition_with_params(
+        self,
+        admonition: str,
+        lines: list[str],
+    ) -> list[str]:
         """Format an admonition section with the first line as a parameter.
 
         Args:
-            admonition (unicode):
+            admonition (str):
                 The admonition name.
 
-            lines (list of unicode):
+            lines (list of str):
                 The list of lines to format.
 
         Returns:
-            list of unicode:
+            list of str:
             The resulting list of lines.
         """
         lines = self._strip_empty(lines)
@@ -313,14 +359,19 @@ class BeanbagDocstring(GoogleDocstring):
             if param_line.endswith(':'):
                 param_line = param_line[:-1]
 
-            return (
-                ['.. %s:: %s' % (admonition, param_line), ''] +
-                self._indent(self._dedent(lines[1:]), 3) + ['']
-            )
+            return [
+                f'.. {admonition}:: {param_line}',
+                '',
+                *self._indent(self._dedent(lines[1:]), 3),
+                '',
+            ]
         else:
-            return ['.. %s::' % admonition, '']
+            return [f'.. {admonition}::', '']
 
-    def _parse(self, parse=False):
+    def _parse(
+        self,
+        parse: bool = False,
+    ) -> None:
         """Parse the docstring.
 
         By default (when called from the parent class), this won't do anything.
@@ -333,9 +384,14 @@ class BeanbagDocstring(GoogleDocstring):
                 Set whether the parsing should actually happen.
         """
         if parse:
-            super(BeanbagDocstring, self)._parse()
+            super()._parse()
 
-    def _consume_field(self, parse_type=True, *args, **kwargs):
+    def _consume_field(
+        self,
+        parse_type: bool = True,
+        *args,
+        **kwargs,
+    ) -> tuple[str, Any, list[str]]:
         """Parse a field line and return the field's information.
 
         This enhances the default version from Napoleon to allow for attribute
@@ -417,12 +473,17 @@ class BeanbagDocstring(GoogleDocstring):
                     # processing.
                     self.queue_line(result)
 
-        name, type_str, desc = super(BeanbagDocstring, self)._consume_field(
+        name, type_str, desc = super()._consume_field(
             parse_type, *args, **kwargs)
 
         return (name, self.make_type_reference(type_str), desc)
 
-    def _consume_returns_section(self, *args, **kwargs):
+    def _consume_returns_section(
+        self,
+        *args,
+        require_type: bool = False,
+        **kwargs,
+    ) -> list[tuple[str, str, list[str]]]:
         """Consume a returns section, converting and handling types.
 
         This enhances the default version from Napoleon to allow for
@@ -434,11 +495,11 @@ class BeanbagDocstring(GoogleDocstring):
             This is the first release to override this functionality.
 
         Args:
-            require_type (bool, optional):
-                Whether to assume the first line is a type.
-
             *args (tuple):
                 Position arguments to pass to the paren method.
+
+            require_type (bool, optional):
+                Whether to assume the first line is a type.
 
             **kwargs (dict):
                 Keyword arguments to pass to the paren method.
@@ -448,7 +509,7 @@ class BeanbagDocstring(GoogleDocstring):
             Information on the field. The format is dependent on the parent
             method.
         """
-        if kwargs.pop('require_type', False):
+        if require_type:
             lines = self.peek_lines(1)
 
             if lines:
@@ -456,9 +517,9 @@ class BeanbagDocstring(GoogleDocstring):
 
                 if not param_line.endswith(':'):
                     self.consume_lines(1)
-                    self.queue_line('%s:' % param_line)
+                    self.queue_line(f'{param_line}:')
 
-        nodes = super(BeanbagDocstring, self)._consume_returns_section(
+        nodes = super()._consume_returns_section(
             *args, **kwargs)
 
         return [
@@ -466,7 +527,10 @@ class BeanbagDocstring(GoogleDocstring):
             for name, type_str, desc in nodes
         ]
 
-    def peek_lines(self, num_lines=1):
+    def peek_lines(
+        self,
+        num_lines: int = 1,
+    ) -> list[str]:
         """Return the specified number of lines without consuming them.
 
         Version Added:
@@ -489,10 +553,14 @@ class BeanbagDocstring(GoogleDocstring):
                 for i in range(num_lines)
             ]
         else:
-            # Sphinx < 5.1
-            return self._line_iter.peek(num_lines)
+            # Sphinx < 5.1. Type is ignored because _line_iter doesn't exist in
+            # current versions.
+            return self._line_iter.peek(num_lines)  # type: ignore
 
-    def consume_lines(self, num_lines):
+    def consume_lines(
+        self,
+        num_lines: int,
+    ) -> None:
         """Consume the specified number of lines.
 
         This will ensure that these lines are not processed any further.
@@ -506,13 +574,17 @@ class BeanbagDocstring(GoogleDocstring):
         """
         if self._USES_LINES_DEQUE:
             # Sphinx >= 5.1
-            for i in range(num_lines):
+            for _i in range(num_lines):
                 self._lines.popleft()
         else:
-            # Sphinx < 5.1
-            self._line_iter.next(num_lines)
+            # Sphinx < 5.1. Type is ignored because _line_iter doesn't exist in
+            # current versions.
+            self._line_iter.next(num_lines)  # type: ignore
 
-    def queue_line(self, line):
+    def queue_line(
+        self,
+        line: str,
+    ) -> None:
         """Queue a line for processing.
 
         This will place the line at the beginning of the processing queue.
@@ -529,9 +601,12 @@ class BeanbagDocstring(GoogleDocstring):
             self._lines.appendleft(line)
         else:
             # Sphinx < 5.1
-            self._line_iter._cache.appendleft(line)
+            self._line_iter._cache.appendleft(line)  # type: ignore
 
-    def make_type_reference(self, type_str):
+    def make_type_reference(
+        self,
+        type_str: str,
+    ) -> str:
         """Create references to types in a type string.
 
         This will parse the string, separating out a type from zero or more
@@ -548,11 +623,11 @@ class BeanbagDocstring(GoogleDocstring):
             2.0
 
         Args:
-            type_str (unicode):
+            type_str (str):
                 The string to parse and create references from.
 
         Returns:
-            unicode:
+            str:
             The new string.
         """
         if not type_str:
@@ -564,7 +639,7 @@ class BeanbagDocstring(GoogleDocstring):
         type_parts = []
 
         for type_part in parts[0].split(' '):
-            if type_part not in ('of', 'or'):
+            if type_part not in {'of', 'or'}:
                 type_part = _convert_type_spec(type_part, type_aliases)
 
             type_parts.append(type_part)
@@ -573,14 +648,21 @@ class BeanbagDocstring(GoogleDocstring):
 
         if len(parts) > 1:
             new_parts += [
-                r' *%s*' % _part.strip()
+                f' *{_part.strip()}*'
                 for _part in parts[1:]
             ]
 
         return ','.join(new_parts)
 
 
-def _filter_members(app, what, name, obj, skip, options):
+def _filter_members(
+    app: Sphinx,
+    what: str,
+    name: str,
+    obj: Any,
+    skip: bool,
+    options: Options,
+) -> bool:
     """Filter members out of the documentation.
 
     This will look up the name in the ``autodoc_excludes`` table under the
@@ -594,11 +676,11 @@ def _filter_members(app, what, name, obj, skip, options):
         app (sphinx.application.Sphinx):
             The Sphinx application to register roles and configuration on.
 
-        what (unicode):
+        what (str):
             The type of thing being filtered (one of ``attribute``, ``class``,
             ``exception``, ``function``, ``method``, or ``module``).
 
-        name (unicode):
+        name (str):
             The name of the object to look up in the filter lists.
 
         obj (object):
@@ -608,7 +690,7 @@ def _filter_members(app, what, name, obj, skip, options):
             Whether the filter will be skipped if this handler doesn't
             return a different value.
 
-        options (object):
+        options (sphinx.ext.autodoc.Options):
             Options given to the autodoc directive.
 
     Returns:
@@ -618,7 +700,7 @@ def _filter_members(app, what, name, obj, skip, options):
     module_name = app.env.temp_data.get('autodoc:module')
 
     if not module_name:
-        return
+        return False
 
     module = sys.modules[module_name]
 
@@ -642,7 +724,14 @@ def _filter_members(app, what, name, obj, skip, options):
     return skip
 
 
-def _process_docstring(app, what, name, obj, options, lines):
+def _process_docstring(
+    app: Sphinx,
+    what: str,
+    name: str,
+    obj: Any,
+    options: Options,
+    lines: list[str],
+) -> None:
     """Process a docstring.
 
     If Beanbag docstrings are enabled, this will parse them and replace the
@@ -652,19 +741,19 @@ def _process_docstring(app, what, name, obj, options, lines):
         app (sphinx.application.Sphinx):
             The Sphinx application.
 
-        what (unicode):
+        what (str):
             The type of thing owning the docstring.
 
-        name (unicode):
+        name (str):
             The name of the thing owning the docstring.
 
         obj (object):
             The object owning the docstring.
 
-        options (dict):
+        options (sphinx.ext.autodoc.Options):
             Options passed to this handler.
 
-        lines (list of unicode):
+        lines (list of str):
             The lines to process.
     """
     if app.config['napoleon_beanbag_docstring']:
@@ -711,7 +800,10 @@ def _replace_config_default(
                types=types)
 
 
-def _on_config_inited(app, config):
+def _on_config_inited(
+    app: Sphinx,
+    config: Config,
+) -> None:
     """Override default configuration settings for Napoleon.
 
     This will ensure that some of our defaults take place for Beanbag
@@ -768,7 +860,7 @@ def _on_config_inited(app, config):
                 new_type_aliases.update({
                     'list': ':py:class:`list`',
                     'tuple': ':py:class:`tuple`',
-                    'unicode': ':py:class:`unicode <str>`',
+                    'unicode': ':py:class:`str <str>`',
                 })
 
     if new_type_aliases:
@@ -800,7 +892,7 @@ def _on_config_inited(app, config):
         new_autodoc_excludes.update({
             key: set(value)
             for key, value in config.autodoc_excludes.items()
-            if key not in ('*', '__defaults__')
+            if key not in {'*', '__defaults__'}
         })
     else:
         new_autodoc_excludes = {
@@ -812,7 +904,9 @@ def _on_config_inited(app, config):
     config.autodoc_excludes = new_autodoc_excludes
 
 
-def setup(app):
+def setup(
+    app: Sphinx,
+) -> ExtensionMetadata:
     """Set up the Sphinx extension.
 
     This sets up the configuration and event handlers needed for enhancing
@@ -827,15 +921,16 @@ def setup(app):
     app.setup_extension('sphinx.ext.intersphinx')
     app.setup_extension('sphinx.ext.napoleon')
 
-    app.add_config_value('use_beanbag_autodoc_defaults', True, True)
-    app.add_config_value('autodoc_excludes', {'__defaults__': True}, True)
-    app.add_config_value('napoleon_beanbag_docstring', True, True)
+    app.add_config_value('use_beanbag_autodoc_defaults', True, 'env')
+    app.add_config_value('autodoc_excludes', {'__defaults__':
+                                              True}, 'env')
+    app.add_config_value('napoleon_beanbag_docstring', True, 'env')
 
     app.connect('autodoc-skip-member', _filter_members)
     app.connect('autodoc-process-docstring', _process_docstring)
     app.connect('config-inited', _on_config_inited)
 
     return {
-        'version': VERSION,
+        'version': get_version_string(),
         'parallel_read_safe': True,
     }
