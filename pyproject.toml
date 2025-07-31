@@ -23,6 +23,7 @@ keywords = [
     'documentation',
     'docs',
     'sphinx',
+    'typing_extensions>=4.6.0',
 ]
 
 classifiers = [
