@@ -17,13 +17,13 @@ dynamic =  ['version']
 dependencies = [
     'Sphinx>=5.0,<=8.999',
     'sphinxcontrib-serializinghtml',
+    'typing_extensions>=4.6.0',
 ]
 
 keywords = [
     'documentation',
     'docs',
     'sphinx',
-    'typing_extensions>=4.6.0',
 ]
 
 classifiers = [
