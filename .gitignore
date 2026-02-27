@@ -4,6 +4,7 @@
 
 # Directories/
 _build
-beanabg_docutils.egg-info/
+beanbag_docutils.egg-info
 build
 dist
+.tox

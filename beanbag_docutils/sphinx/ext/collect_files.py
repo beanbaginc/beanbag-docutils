@@ -32,12 +32,24 @@ Configuration
     into the build directory.
 """
 
+from __future__ import annotations
+
 import os
 import shutil
 from fnmatch import fnmatch
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from typing import Any
+
+    from sphinx.application import Sphinx
+    from sphinx.environment import BuildEnvironment
 
 
-def collect_files(app, env):
+def collect_files(
+    app: Sphinx,
+    env: BuildEnvironment,
+) -> None:
     """Collect configured files and put them into the build directory.
 
     Args:
@@ -48,8 +60,8 @@ def collect_files(app, env):
             The build environment for the generated docs.
     """
     collect_patterns = app.config['collect_file_patterns']
-    src_dir = app.builder.srcdir
-    out_dir = app.builder.outdir
+    src_dir = str(app.builder.srcdir)
+    out_dir = str(app.builder.outdir)
 
     for root, dirs, files in os.walk(src_dir):
         # Make sure we don't recurse into the build directory.
@@ -69,7 +81,9 @@ def collect_files(app, env):
                     break
 
 
-def setup(app):
+def setup(
+    app: Sphinx,
+) -> dict[str, Any]:
     """Set up the Sphinx extension.
 
     This listens for the events needed to collect files.
@@ -82,7 +96,7 @@ def setup(app):
         dict:
         Information about the extension.
     """
-    app.add_config_value('collect_file_patterns', {}, True)
+    app.add_config_value('collect_file_patterns', [], 'env')
     app.connect('env-updated', collect_files)
 
     return {
