@@ -282,7 +282,7 @@ def github_linkcode_resolve(domain, info, github_org_id, github_repo_id,
 
     This takes some basic information on the GitHub project, branch, and
     what modules are considered acceptable, and generates a link to the
-    approprite line on the GitHub repository browser for the class, function,
+    appropriate line on the GitHub repository browser for the class, function,
     variable, or other object.
 
     Version Changed:
