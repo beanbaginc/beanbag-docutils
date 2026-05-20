@@ -62,11 +62,19 @@ class ImageTests(SphinxExtTestCase):
             '             3x path/to/image@3x.png\n'
         )
 
-        self.assertEqual(
-            rendered.replace('\n', ''),
-            '<a class="reference internal image-reference"'
-            ' href="_images/image.png">'
-            '<img srcset="_images/image.png 1x, _images/image%402x.png 2x,'
-            ' _images/image%403x.png 3x" width="100" height="200"'
-            ' alt="_images/image.png" src="_images/image.png" />'
-            '</a>')
+        # Be tolerant to attribute order differences in generated HTML.
+        html = rendered.replace('\n', '')
+
+        # Verify link wrapper and closing tag.
+        self.assertTrue(
+            html.startswith('<a class="reference internal image-reference" href="_images/image.png">'),
+            msg=f"Unexpected anchor start: {html}")
+        self.assertTrue(html.endswith('</a>'), msg=f"Unexpected anchor end: {html}")
+
+        # Verify the <img> tag contains the expected attributes regardless of order.
+        self.assertIn('<img', html)
+        self.assertIn('srcset="_images/image.png 1x, _images/image%402x.png 2x, _images/image%403x.png 3x"', html)
+        self.assertIn('width="100"', html)
+        self.assertIn('height="200"', html)
+        self.assertIn('alt="_images/image.png"', html)
+        self.assertIn('src="_images/image.png"', html)
